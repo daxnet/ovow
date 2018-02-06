@@ -24,15 +24,16 @@ namespace Ovow.Framework.Messaging
             }
         }
 
-        public void RegisterHandler<TMessage>(Action<TMessage> handler) where TMessage : IMessage
+        public void RegisterHandler<TMessage>(Action<IMessage> handler)
+            where TMessage : IMessage
         {
             if (messageHandlers.TryGetValue(typeof(TMessage), out var handlers))
             {
-                handlers.Add(handler as Action<IMessage>);
+                handlers.Add(handler);
             }
             else
             {
-                messageHandlers.TryAdd(typeof(TMessage), new List<Action<IMessage>> { handler as Action<IMessage> });
+                messageHandlers.TryAdd(typeof(TMessage), new List<Action<IMessage>> { handler });
             }
         }
     }

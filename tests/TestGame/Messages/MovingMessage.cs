@@ -12,7 +12,7 @@ namespace TestGame.Messages
         private readonly Guid id = Guid.NewGuid();
         private readonly DateTime timestamp = DateTime.UtcNow;
 
-        public MovingMessage(Direction movingDirection, int delta)
+        public MovingMessage(Direction movingDirection, float delta)
         {
             this.MovingDirection = movingDirection;
             this.Delta = delta;
@@ -24,7 +24,7 @@ namespace TestGame.Messages
 
         public Direction MovingDirection { get; }
 
-        public int Delta { get; }
+        public float Delta { get; }
 
 
         [Flags]

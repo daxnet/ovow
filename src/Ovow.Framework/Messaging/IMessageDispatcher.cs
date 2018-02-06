@@ -8,7 +8,7 @@ namespace Ovow.Framework.Messaging
 {
     public interface IMessageDispatcher
     {
-        void RegisterHandler<TMessage>(Action<TMessage> handler)
+        void RegisterHandler<TMessage>(Action<IMessage> handler)
             where TMessage : IMessage;
 
         void DispatchMessage<TMessage>(TMessage message)

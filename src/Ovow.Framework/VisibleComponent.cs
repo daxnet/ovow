@@ -9,7 +9,7 @@ using Ovow.Framework.Messaging;
 
 namespace Ovow.Framework
 {
-    public abstract class VisibleComponent : IVisible, IComponent
+    public abstract class VisibleComponent : IVisible
     {
         protected readonly IOvowGame game;
 
@@ -28,7 +28,8 @@ namespace Ovow.Framework
         public void Subscribe<TMessage>(Action<TMessage> handler) 
             where TMessage : IMessage
         {
-            this.game.MessageDispatcher.RegisterHandler(handler);
+            Action<IMessage> convertedHandler = (message) => handler((TMessage)message);
+            this.game.MessageDispatcher.RegisterHandler<TMessage>(convertedHandler);
         }
 
         public abstract void Update(GameTime gameTime);
