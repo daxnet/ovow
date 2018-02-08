@@ -11,6 +11,7 @@ namespace TestGame
     /// </summary>
     public class Game1 : OvowGame
     {
+        private const float MovingDelta = 10;
         private Texture2D star;
 
         public Game1()
@@ -22,7 +23,7 @@ namespace TestGame
         {
             base.LoadContent();
             star = this.Content.Load<Texture2D>("star");
-            var starSprite = new Sprite(this, star);
+            var starSprite = new Sprite(this, star, new Vector2(200, 200));
             starSprite.Subscribe<MovingMessage>(mm =>
             {
                 switch (mm.MovingDirection)
@@ -47,29 +48,29 @@ namespace TestGame
                 starSprite.X = 200; starSprite.Y = 200;
             });
 
-            this.GameVisibles.Add(starSprite);
+            this.Add(starSprite);
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.W))
             {
-                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Up, 20));
+                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Up, MovingDelta));
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.S))
             {
-                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Down, 20));
+                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Down, MovingDelta));
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.A))
             {
-                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Left, 20));
+                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Left, MovingDelta));
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.D))
             {
-                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Right, 20));
+                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Right, MovingDelta));
             }
 
             if (Keyboard.GetState().IsKeyDown(Keys.Space))

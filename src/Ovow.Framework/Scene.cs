@@ -10,7 +10,7 @@ namespace Ovow.Framework
 {
     public class Scene : VisibleComponent
     {
-        public Scene(IOvowGame game) : base(game)
+        public Scene(IOvowGame game, Texture2D texture) : base(game, texture)
         {
         }
 

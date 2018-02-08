@@ -15,10 +15,5 @@ namespace Ovow.Framework
     {
         void Update(GameTime gameTime);
 
-        void Subscribe<TMessage>(Action<TMessage> handler)
-            where TMessage : IMessage;
-
-        void Publish<TMessage>(TMessage message)
-            where TMessage : IMessage;
     }
 }

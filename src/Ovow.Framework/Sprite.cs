@@ -10,22 +10,15 @@ namespace Ovow.Framework
 {
     public class Sprite : VisibleComponent
     {
-        private readonly Texture2D texture;
-
-        public Sprite(IOvowGame game, Texture2D texture) : base(game)
+        public Sprite(IOvowGame game, Texture2D texture, Vector2 position) 
+            : base(game, texture, position)
         {
-            this.texture = texture;
-            this.X = 200;
-            this.Y = 200;
+            
         }
-
-        public float X { get; set; }
-
-        public float Y { get; set; }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(this.texture, new Vector2(this.X, this.Y), Color.Wheat);
+            spriteBatch.Draw(Texture, Position, Color.Wheat);
         }
 
         public override void Update(GameTime gameTime)
