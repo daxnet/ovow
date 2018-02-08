@@ -11,7 +11,9 @@ namespace Ovow.Framework
 {
     public interface IVisibleComponent : IComponent, IMessagePublisher, IMessageSubscriber
     {
-        Vector2 Position { get; set; }
+        Rectangle BoundingBox { get; }
+
+        Vector2 Position { get; }
 
         Texture2D Texture { get; }
 

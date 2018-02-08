@@ -6,35 +6,37 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework.Messaging;
+using Ovow.Framework.Messaging.GeneralMessages;
 
 namespace Ovow.Framework.Services
 {
-    public sealed class CollisionDetection : IGameService
+    public sealed class CollisionDetection : GameService
     {
-        private readonly IOvowGame game;
         private static readonly CollisionDetector detector = new CollisionDetector();
 
         public CollisionDetection(IOvowGame game)
+            : base(game)
         {
-            this.game = game;
+
         }
 
-        public IOvowGame Game => this.game;
-
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
-            var list = this.game.OvowGameComponents.ToList();
+            var list = this.Game.OvowGameComponents.ToList();
             var aArray = new IVisibleComponent[list.Count];
             var bArray = new IVisibleComponent[list.Count];
             foreach( var elementA in aArray)
             {
                 foreach(var elementB in bArray)
                 {
-                    // TODO: 
-                    if (elementB == elementA)
+                    if (elementA.Equals(elementB))
+                    {
+                        continue;
+                    }
+
                     if (detector.Collides(elementA, elementB, true))
                     {
-
+                        this.Game.MessageDispatcher.DispatchMessage(new CollisionDetectedMessage(elementA, elementB));
                     }
                 }
             }
@@ -52,18 +54,15 @@ namespace Ovow.Framework.Services
                 var widthOther = b.Texture.Width;
                 var heightOther = b.Texture.Height;
 
-                var aBounds = new Rectangle((int)a.Position.X, (int)a.Position.Y, a.Texture.Width, a.Texture.Height);
-                var bBounds = new Rectangle((int)b.Position.X, (int)b.Position.Y, b.Texture.Width, b.Texture.Height);
-
                 if (byPixel &&                                // if we need per pixel
                     ((Math.Min(widthOther, heightOther) > 100) ||  // at least avoid doing it
                     (Math.Min(widthMe, heightMe) > 100)))          // for small sizes (nobody will notice :P)
                 {
-                    return aBounds.Intersects(bBounds) // If simple intersection fails, don't even bother with per-pixel
+                    return a.BoundingBox.Intersects(b.BoundingBox) // If simple intersection fails, don't even bother with per-pixel
                         && PerPixelCollision(a, b);
                 }
 
-                return aBounds.Intersects(bBounds);
+                return a.BoundingBox.Intersects(b.BoundingBox);
             }
 
             private static bool PerPixelCollision(IVisibleComponent a, IVisibleComponent b)

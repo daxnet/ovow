@@ -1,4 +1,5 @@
-﻿using Ovow.Framework.Messaging;
+﻿using Microsoft.Xna.Framework;
+using Ovow.Framework.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,5 +17,7 @@ namespace Ovow.Framework
         IEnumerable<IComponent> OvowGameComponents { get; }
 
         IMessageDispatcher MessageDispatcher { get; }
+
+        GraphicsDeviceManager GraphicsDeviceManager { get; }
     }
 }

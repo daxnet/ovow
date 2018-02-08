@@ -44,7 +44,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Component.cs" />
     <Compile Include="IOvowGame.cs" />
+    <Compile Include="Messaging\GeneralMessages\ReachBoundaryMessage.cs" />
     <Compile Include="Messaging\IMessageDispatcher.cs" />
     <Compile Include="Messaging\IMessagePublisher.cs" />
     <Compile Include="Messaging\IMessageSubscriber.cs" />
@@ -58,6 +60,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="Services\CollisionDetection.cs" />
+    <Compile Include="Services\GameService.cs" />
     <Compile Include="Services\IGameService.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="VisibleComponent.cs" />

@@ -20,10 +20,5 @@ namespace Ovow.Framework
         {
             spriteBatch.Draw(Texture, Position, Color.Wheat);
         }
-
-        public override void Update(GameTime gameTime)
-        {
-            // throw new NotImplementedException();
-        }
     }
 }

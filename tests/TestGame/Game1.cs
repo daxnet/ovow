@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Ovow.Framework;
+using Ovow.Framework.Messaging.GeneralMessages;
 using TestGame.Messages;
 
 namespace TestGame
@@ -11,72 +12,88 @@ namespace TestGame
     /// </summary>
     public class Game1 : OvowGame
     {
-        private const float MovingDelta = 10;
-        private Texture2D star;
+        // private const float MovingDelta = 8;
+        private Texture2D football;
+
+        private float xDelta1 = 15;
+        private float yDelta1 = 12;
+
+        private float xDelta2 = -15;
+        private float yDelta2 = -12;
+
+        private Sprite footballSprite1;
+        private Sprite footballSprite2;
 
         public Game1()
         {
 
         }
 
+        protected override void Initialize()
+        {
+            GraphicsDeviceManager.IsFullScreen = false;
+            // GraphicsDeviceManager.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
+            // GraphicsDeviceManager.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
+            GraphicsDeviceManager.PreferredBackBufferWidth = 1024;
+            GraphicsDeviceManager.PreferredBackBufferHeight = 768;
+            GraphicsDeviceManager.ApplyChanges();
+            base.Initialize();
+            Window.AllowUserResizing = true;
+            GraphicsDeviceManager.ApplyChanges();
+        }
+
         protected override void LoadContent()
         {
             base.LoadContent();
-            star = this.Content.Load<Texture2D>("star");
-            var starSprite = new Sprite(this, star, new Vector2(200, 200));
-            starSprite.Subscribe<MovingMessage>(mm =>
+            football = this.Content.Load<Texture2D>("football");
+
+            footballSprite1 = new Sprite(this, football, new Vector2(200, 200));
+            footballSprite1.Subscribe<ReachBoundaryMessage>(m =>
             {
-                switch (mm.MovingDirection)
+                if ((m.ReachedBoundary & ReachBoundaryMessage.Boundary.Left) == ReachBoundaryMessage.Boundary.Left ||
+                (m.ReachedBoundary & ReachBoundaryMessage.Boundary.Right) == ReachBoundaryMessage.Boundary.Right)
                 {
-                    case MovingMessage.Direction.Up:
-                        starSprite.Y -= mm.Delta;
-                        break;
-                    case MovingMessage.Direction.Down:
-                        starSprite.Y += mm.Delta;
-                        break;
-                    case MovingMessage.Direction.Left:
-                        starSprite.X -= mm.Delta;
-                        break;
-                    case MovingMessage.Direction.Right:
-                        starSprite.X += mm.Delta;
-                        break;
+                    xDelta1 = -xDelta1;
+                }
+
+                if ((m.ReachedBoundary & ReachBoundaryMessage.Boundary.Top) == ReachBoundaryMessage.Boundary.Top ||
+                (m.ReachedBoundary & ReachBoundaryMessage.Boundary.Bottom) == ReachBoundaryMessage.Boundary.Bottom)
+                {
+                    yDelta1 = -yDelta1;
                 }
             });
 
-            starSprite.Subscribe<ResetLocationMessage>(rm =>
+            footballSprite2 = new Sprite(this, football, new Vector2(50, 50));
+            footballSprite2.Subscribe<ReachBoundaryMessage>(m =>
             {
-                starSprite.X = 200; starSprite.Y = 200;
+                if ((m.ReachedBoundary & ReachBoundaryMessage.Boundary.Left) == ReachBoundaryMessage.Boundary.Left ||
+                (m.ReachedBoundary & ReachBoundaryMessage.Boundary.Right) == ReachBoundaryMessage.Boundary.Right)
+                {
+                    xDelta2 = -xDelta2;
+                }
+
+                if ((m.ReachedBoundary & ReachBoundaryMessage.Boundary.Top) == ReachBoundaryMessage.Boundary.Top ||
+                (m.ReachedBoundary & ReachBoundaryMessage.Boundary.Bottom) == ReachBoundaryMessage.Boundary.Bottom)
+                {
+                    yDelta2 = -yDelta2;
+                }
             });
 
-            this.Add(starSprite);
+            this.Add(footballSprite1);
+            this.Add(footballSprite2);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.W))
-            {
-                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Up, MovingDelta));
-            }
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();
 
-            if (Keyboard.GetState().IsKeyDown(Keys.S))
-            {
-                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Down, MovingDelta));
-            }
+            footballSprite1.X += xDelta1;
+            footballSprite1.Y += yDelta1;
 
-            if (Keyboard.GetState().IsKeyDown(Keys.A))
-            {
-                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Left, MovingDelta));
-            }
-
-            if (Keyboard.GetState().IsKeyDown(Keys.D))
-            {
-                this.MessageDispatcher.DispatchMessage<MovingMessage>(new MovingMessage(MovingMessage.Direction.Right, MovingDelta));
-            }
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Space))
-            {
-                this.MessageDispatcher.DispatchMessage(new ResetLocationMessage());
-            }
+            footballSprite2.X += xDelta2;
+            footballSprite2.Y += yDelta2;
 
             base.Update(gameTime);
         }

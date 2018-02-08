@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework.Messaging;
+using Ovow.Framework.Messaging.GeneralMessages;
 
 namespace Ovow.Framework
 {
-    public abstract class VisibleComponent : IVisibleComponent
+    public abstract class VisibleComponent : Component, IVisibleComponent
     {
         protected readonly IOvowGame game;
 
         protected VisibleComponent(IOvowGame game, Texture2D texture)
-            : this (game, texture, Vector2.Zero)
+            : this(game, texture, Vector2.Zero)
         {
 
         }
@@ -23,52 +24,79 @@ namespace Ovow.Framework
         {
             this.game = game;
             this.Texture = texture;
-            this.Position = position;
+            this.X = position.X;
+            this.Y = position.Y;
         }
 
         public Texture2D Texture { get; }
 
-        public Vector2 Position { get; set; }
+        public Vector2 Position => new Vector2(X, Y);
 
-        public float X
+        public float X { get; set; }
+
+        public float Y { get; set; }
+
+        public int Width => this.Texture.Width;
+
+        public int Height => this.Texture.Height;
+
+        public bool OutOfViewport
         {
             get
             {
-                return this.Position.X;
-            }
-            set
-            {
-                this.Position = new Vector2(value, this.Position.Y);
+                var viewport = this.game.GraphicsDeviceManager.GraphicsDevice.Viewport;
+                return (X + Width <= 0) || (Y + Height <= 0) || (X >= viewport.Width) || (Y >= viewport.Height);
             }
         }
 
-        public float Y
+        public bool HitViewportBoundary
         {
             get
             {
-                return this.Position.Y;
-            }
-            set
-            {
-                this.Position = new Vector2(this.Position.X, value);
+                var viewport = this.game.GraphicsDeviceManager.GraphicsDevice.Viewport;
+                return (X <= 0) || (Y <= 0) || (X >= viewport.Width - Width) || (Y >= viewport.Height - Height);
             }
         }
 
+        public Rectangle BoundingBox => new Rectangle((int)X, (int)Y, Width, Height);
 
         public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
+
+        public override void Update(GameTime gameTime)
+        {
+            var viewport = this.game.GraphicsDeviceManager.GraphicsDevice.Viewport;
+            ReachBoundaryMessage.Boundary b = ReachBoundaryMessage.Boundary.None;
+            if (X <= 0)
+            {
+                b |= ReachBoundaryMessage.Boundary.Left;
+            }
+            if (Y <= 0)
+            {
+                b |= ReachBoundaryMessage.Boundary.Top;
+            }
+            if (X >= viewport.Width - Width)
+            {
+                b |= ReachBoundaryMessage.Boundary.Right;
+            }
+            if (Y >= viewport.Height - Height)
+            {
+                b |= ReachBoundaryMessage.Boundary.Bottom;
+            }
+
+            this.Publish(new ReachBoundaryMessage(b));
+        }
 
         public void Publish<TMessage>(TMessage message) where TMessage : IMessage
         {
             this.game.MessageDispatcher.DispatchMessage(message);
         }
 
-        public void Subscribe<TMessage>(Action<TMessage> handler) 
+        public void Subscribe<TMessage>(Action<TMessage> handler)
             where TMessage : IMessage
         {
             Action<IMessage> convertedHandler = (message) => handler((TMessage)message);
             this.game.MessageDispatcher.RegisterHandler<TMessage>(convertedHandler);
         }
 
-        public abstract void Update(GameTime gameTime);
     }
 }

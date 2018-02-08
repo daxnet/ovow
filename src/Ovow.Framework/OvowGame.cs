@@ -65,5 +65,7 @@ namespace Ovow.Framework
         public IEnumerable<Scene> Scenes => throw new NotImplementedException();
 
         public IMessageDispatcher MessageDispatcher => messageDispatcher;
+
+        public GraphicsDeviceManager GraphicsDeviceManager => graphicsDeviceManager;
     }
 }

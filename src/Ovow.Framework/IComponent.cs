@@ -11,8 +11,10 @@ namespace Ovow.Framework
     /// <summary>
     /// Represents that the implemented classes are game components.
     /// </summary>
-    public interface IComponent
+    public interface IComponent : IEquatable<IComponent>
     {
+        Guid Id { get; }
+
         void Update(GameTime gameTime);
 
     }
