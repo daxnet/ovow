@@ -8,7 +8,7 @@ namespace Ovow.Framework.Messaging
 {
     public interface IMessageSubscriber
     {
-        void Subscribe<TMessage>(Action<TMessage> handler)
+        void Subscribe<TMessage>(Action<object, TMessage> handler)
             where TMessage : IMessage;
     }
 }

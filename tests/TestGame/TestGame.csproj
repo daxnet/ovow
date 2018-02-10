@@ -44,6 +44,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Game1.cs" />
+    <Compile Include="JumpingSprite.cs" />
     <Compile Include="Messages\MovingMessage.cs" />
     <Compile Include="Messages\ResetLocationMessage.cs" />
     <Compile Include="Program.cs" />

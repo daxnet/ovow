@@ -88,15 +88,16 @@ namespace Ovow.Framework
 
         public void Publish<TMessage>(TMessage message) where TMessage : IMessage
         {
-            this.game.MessageDispatcher.DispatchMessage(message);
+            this.game.MessageDispatcher.DispatchMessage(this, message);
         }
 
-        public void Subscribe<TMessage>(Action<TMessage> handler)
+        public void Subscribe<TMessage>(Action<object, TMessage> handler)
             where TMessage : IMessage
         {
-            Action<IMessage> convertedHandler = (message) => handler((TMessage)message);
-            this.game.MessageDispatcher.RegisterHandler<TMessage>(convertedHandler);
+            this.game.MessageDispatcher.RegisterHandler<TMessage>(handler);
         }
+
+        public override string ToString() => this.Id.ToString();
 
     }
 }

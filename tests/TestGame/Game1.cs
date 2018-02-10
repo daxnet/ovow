@@ -3,6 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Ovow.Framework;
 using Ovow.Framework.Messaging.GeneralMessages;
+using Ovow.Framework.Services;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using TestGame.Messages;
 
 namespace TestGame
@@ -12,17 +16,12 @@ namespace TestGame
     /// </summary>
     public class Game1 : OvowGame
     {
-        // private const float MovingDelta = 8;
+        private const int NumOfBalls = 8;
+        private const int MaxDelta = 10;
+
+        private static readonly Random rnd = new Random(DateTime.UtcNow.Millisecond);
+
         private Texture2D football;
-
-        private float xDelta1 = 15;
-        private float yDelta1 = 12;
-
-        private float xDelta2 = -15;
-        private float yDelta2 = -12;
-
-        private Sprite footballSprite1;
-        private Sprite footballSprite2;
 
         public Game1()
         {
@@ -47,40 +46,60 @@ namespace TestGame
             base.LoadContent();
             football = this.Content.Load<Texture2D>("football");
 
-            footballSprite1 = new Sprite(this, football, new Vector2(200, 200));
-            footballSprite1.Subscribe<ReachBoundaryMessage>(m =>
+            var screenWidth = GraphicsDeviceManager.GraphicsDevice.Viewport.Width;
+            var screenHeight = GraphicsDeviceManager.GraphicsDevice.Viewport.Height;
+
+            for (var i = 0; i < NumOfBalls; i++)
             {
-                if ((m.ReachedBoundary & ReachBoundaryMessage.Boundary.Left) == ReachBoundaryMessage.Boundary.Left ||
-                (m.ReachedBoundary & ReachBoundaryMessage.Boundary.Right) == ReachBoundaryMessage.Boundary.Right)
-                {
-                    xDelta1 = -xDelta1;
-                }
+                var initialX = rnd.Next(1, screenWidth - football.Width);
+                var initialY = rnd.Next(1, screenHeight - football.Height);
+                var dX = (rnd.Next(5, MaxDelta + 1)) * (rnd.Next(2) == 0 ? -1 : 1);
+                var dY = (rnd.Next(5, MaxDelta + 1)) * (rnd.Next(2) == 0 ? -1 : 1);
 
-                if ((m.ReachedBoundary & ReachBoundaryMessage.Boundary.Top) == ReachBoundaryMessage.Boundary.Top ||
-                (m.ReachedBoundary & ReachBoundaryMessage.Boundary.Bottom) == ReachBoundaryMessage.Boundary.Bottom)
+                var footballSprite = new JumpingSprite(this, football, new Vector2(initialX, initialY), dX, dY);
+                footballSprite.Subscribe<ReachBoundaryMessage>((publisher, message) =>
                 {
-                    yDelta1 = -yDelta1;
-                }
-            });
+                    if (publisher == footballSprite)
+                    {
+                        if ((message.ReachedBoundary & ReachBoundaryMessage.Boundary.Left) == ReachBoundaryMessage.Boundary.Left ||
+                        (message.ReachedBoundary & ReachBoundaryMessage.Boundary.Right) == ReachBoundaryMessage.Boundary.Right)
+                        {
+                            footballSprite.DX *= -1;
+                        }
 
-            footballSprite2 = new Sprite(this, football, new Vector2(50, 50));
-            footballSprite2.Subscribe<ReachBoundaryMessage>(m =>
-            {
-                if ((m.ReachedBoundary & ReachBoundaryMessage.Boundary.Left) == ReachBoundaryMessage.Boundary.Left ||
-                (m.ReachedBoundary & ReachBoundaryMessage.Boundary.Right) == ReachBoundaryMessage.Boundary.Right)
+                        if ((message.ReachedBoundary & ReachBoundaryMessage.Boundary.Top) == ReachBoundaryMessage.Boundary.Top ||
+                        (message.ReachedBoundary & ReachBoundaryMessage.Boundary.Bottom) == ReachBoundaryMessage.Boundary.Bottom)
+                        {
+                            footballSprite.DY *= -1;
+                        }
+                    }
+                });
+
+                footballSprite.Subscribe<CollisionDetectedMessage>((publisher, message) =>
                 {
-                    xDelta2 = -xDelta2;
-                }
+                    if (message.A.Equals(footballSprite))
+                    {
+                        var selfOrientation = footballSprite.Orientation;
+                        var collisionOrientation = message.CollisionInformationA.Orientation;
+                        if ((selfOrientation & collisionOrientation & Orientation.East) == Orientation.East ||
+                            (selfOrientation & collisionOrientation & Orientation.West) == Orientation.West)
+                        {
+                            footballSprite.DX *= -1;
+                        }
 
-                if ((m.ReachedBoundary & ReachBoundaryMessage.Boundary.Top) == ReachBoundaryMessage.Boundary.Top ||
-                (m.ReachedBoundary & ReachBoundaryMessage.Boundary.Bottom) == ReachBoundaryMessage.Boundary.Bottom)
-                {
-                    yDelta2 = -yDelta2;
-                }
-            });
+                        if ((selfOrientation & collisionOrientation & Orientation.North) == Orientation.North ||
+                            (selfOrientation & collisionOrientation & Orientation.South) == Orientation.South)
+                        {
+                            footballSprite.DY *= -1;
+                        }
+                    }
+                });
 
-            this.Add(footballSprite1);
-            this.Add(footballSprite2);
+                this.Add(footballSprite);
+            }
+
+            var collisionDetectionService = new CollisionDetectionService(this);
+            this.Add(collisionDetectionService);
         }
 
         protected override void Update(GameTime gameTime)
@@ -89,11 +108,29 @@ namespace TestGame
                 Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            footballSprite1.X += xDelta1;
-            footballSprite1.Y += yDelta1;
+            Parallel.ForEach(this.OvowGameComponents, component =>
+            {
+                var viewportWidth = GraphicsDevice.Viewport.Width;
+                var viewportHeight = GraphicsDevice.Viewport.Height;
+                if (component is JumpingSprite)
+                {
+                    var js = component as JumpingSprite;
+                    
+                    // Fix the issue that when the sprite X or Y plus the delta is out of the viewport boundary.
+                    if (js.X + js.DX <= 0 || js.X + js.DX >= viewportWidth - js.Width)
+                    {
+                        js.DX *= -1;
+                    }
 
-            footballSprite2.X += xDelta2;
-            footballSprite2.Y += yDelta2;
+                    if (js.Y + js.DY <= 0 || js.Y + js.DY >= viewportHeight - js.Height)
+                    {
+                        js.DY *= -1;
+                    }
+
+                    js.X += js.DX;
+                    js.Y += js.DY;
+                }
+            });
 
             base.Update(gameTime);
         }
