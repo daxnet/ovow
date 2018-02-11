@@ -58,6 +58,7 @@
     <Compile Include="IComponent.cs" />
     <Compile Include="Messaging\IMessage.cs" />
     <Compile Include="IVisibleComponent.cs" />
+    <Compile Include="OvowGameWindowSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="Services\CollisionDetectionService.cs" />

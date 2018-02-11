@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework.Messaging;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Ovow.Framework
 {
     public interface IOvowGame
     {
-        void Add(IComponent component);
+        void AddGameComponent(IComponent component);
 
         IEnumerable<Scene> Scenes { get; }
 
@@ -18,6 +19,6 @@ namespace Ovow.Framework
 
         IMessageDispatcher MessageDispatcher { get; }
 
-        GraphicsDeviceManager GraphicsDeviceManager { get; }
+        GraphicsDevice GraphicsDevice { get; }
     }
 }

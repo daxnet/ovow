@@ -7,9 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "framework", "framework", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{861C3724-2910-43FF-9557-7571790D1A36}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGame", "tests\TestGame\TestGame.csproj", "{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ovow.Framework", "src\Ovow.Framework\Ovow.Framework.csproj", "{43D640ED-B974-4612-AADC-4CCCC1EE7BEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PingPongGame", "tests\PingPongGame\PingPongGame.csproj", "{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,21 +17,21 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}.Release|Any CPU.Build.0 = Release|Any CPU
 		{43D640ED-B974-4612-AADC-4CCCC1EE7BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{43D640ED-B974-4612-AADC-4CCCC1EE7BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43D640ED-B974-4612-AADC-4CCCC1EE7BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43D640ED-B974-4612-AADC-4CCCC1EE7BEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824} = {861C3724-2910-43FF-9557-7571790D1A36}
 		{43D640ED-B974-4612-AADC-4CCCC1EE7BEF} = {6A1C0E47-0219-404E-90E1-B2D16394B702}
+		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824} = {861C3724-2910-43FF-9557-7571790D1A36}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {012781C3-AE4B-4323-8337-C828559993DB}

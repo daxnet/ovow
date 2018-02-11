@@ -13,15 +13,42 @@ namespace Ovow.Framework
     public class OvowGame : Game, IOvowGame
     {
         private readonly GraphicsDeviceManager graphicsDeviceManager;
+        private readonly OvowGameWindowSettings windowSettings;
         private readonly IMessageDispatcher messageDispatcher = new MessageDispatcher();
         private readonly List<IComponent> ovowGameComponents = new List<IComponent>();
 
         protected SpriteBatch spriteBatch;
 
         public OvowGame()
+            : this(OvowGameWindowSettings.NormalScreenShowMouse)
+        { }
+
+        public OvowGame(OvowGameWindowSettings windowSettings)
         {
             graphicsDeviceManager = new GraphicsDeviceManager(this);
+            this.windowSettings = windowSettings;
             Content.RootDirectory = "Content";
+        }
+
+        protected override void Initialize()
+        {
+            graphicsDeviceManager.IsFullScreen = this.windowSettings.IsFullScreen;
+            if (!this.windowSettings.IsFullScreen)
+            {
+                graphicsDeviceManager.PreferredBackBufferWidth = this.windowSettings.Width;
+                graphicsDeviceManager.PreferredBackBufferHeight = this.windowSettings.Height;
+            }
+            else
+            {
+                graphicsDeviceManager.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
+                graphicsDeviceManager.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
+            }
+
+            Window.AllowUserResizing = this.windowSettings.AllowUserResizing;
+            this.IsMouseVisible = this.windowSettings.MouseVisible;
+            graphicsDeviceManager.ApplyChanges();
+
+            base.Initialize();
         }
 
         protected override void LoadContent()
@@ -35,7 +62,9 @@ namespace Ovow.Framework
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            ovowGameComponents.ForEach(x => x.Update(gameTime));
+            ovowGameComponents
+                .ToList()
+                .ForEach(c => c.Update(gameTime));
 
             base.Update(gameTime);
         }
@@ -46,16 +75,18 @@ namespace Ovow.Framework
 
             this.spriteBatch.Begin();
 
-            Parallel.ForEach(ovowGameComponents
-                .Where(x => x is IVisibleComponent)
-                .Select(x => x as IVisibleComponent), visibleComponent => visibleComponent.Draw(gameTime, this.spriteBatch));
+            ovowGameComponents
+                .Where(c => c is IVisibleComponent)
+                .Select(c => c as IVisibleComponent)
+                .ToList()
+                .ForEach(vc => vc.Draw(gameTime, this.spriteBatch));
 
             this.spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        public void Add(IComponent component)
+        public void AddGameComponent(IComponent component)
         {
             this.ovowGameComponents.Add(component);
         }
@@ -65,7 +96,5 @@ namespace Ovow.Framework
         public IEnumerable<Scene> Scenes => throw new NotImplementedException();
 
         public IMessageDispatcher MessageDispatcher => messageDispatcher;
-
-        public GraphicsDeviceManager GraphicsDeviceManager => graphicsDeviceManager;
     }
 }

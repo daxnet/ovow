@@ -44,7 +44,7 @@ namespace Ovow.Framework
         {
             get
             {
-                var viewport = this.game.GraphicsDeviceManager.GraphicsDevice.Viewport;
+                var viewport = this.game.GraphicsDevice.Viewport;
                 return (X + Width <= 0) || (Y + Height <= 0) || (X >= viewport.Width) || (Y >= viewport.Height);
             }
         }
@@ -53,7 +53,7 @@ namespace Ovow.Framework
         {
             get
             {
-                var viewport = this.game.GraphicsDeviceManager.GraphicsDevice.Viewport;
+                var viewport = this.game.GraphicsDevice.Viewport;
                 return (X <= 0) || (Y <= 0) || (X >= viewport.Width - Width) || (Y >= viewport.Height - Height);
             }
         }
@@ -64,7 +64,7 @@ namespace Ovow.Framework
 
         public override void Update(GameTime gameTime)
         {
-            var viewport = this.game.GraphicsDeviceManager.GraphicsDevice.Viewport;
+            var viewport = this.game.GraphicsDevice.Viewport;
             ReachBoundaryMessage.Boundary b = ReachBoundaryMessage.Boundary.None;
             if (X <= 0)
             {

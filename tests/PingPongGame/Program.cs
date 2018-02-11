@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestGame
+namespace PingPongGame
 {
     /// <summary>
     /// The main class.
