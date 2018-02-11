@@ -25,8 +25,8 @@ namespace Ovow.Framework
 {
     public class Sprite : VisibleComponent
     {
-        public Sprite(IOvowGame game, Texture2D texture, Vector2 position)
-            : base(game, texture, position)
+        public Sprite(IScene scene, Texture2D texture, Vector2 position)
+            : base(scene, texture, position)
         {
         }
 

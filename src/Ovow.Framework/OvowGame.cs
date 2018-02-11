@@ -22,7 +22,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Ovow.Framework.Messaging;
+using Ovow.Framework.Messaging.GeneralMessages;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,7 +35,8 @@ namespace Ovow.Framework
         private readonly GraphicsDeviceManager graphicsDeviceManager;
         private readonly OvowGameWindowSettings windowSettings;
         private readonly IMessageDispatcher messageDispatcher = new MessageDispatcher();
-        private readonly List<IComponent> ovowGameComponents = new List<IComponent>();
+        private readonly List<IScene> scenes = new List<IScene>();
+        private int sceneIndex = 0;
 
         protected SpriteBatch spriteBatch;
 
@@ -46,6 +49,16 @@ namespace Ovow.Framework
             graphicsDeviceManager = new GraphicsDeviceManager(this);
             this.windowSettings = windowSettings;
             Content.RootDirectory = "Content";
+
+            this.messageDispatcher.RegisterHandler<SceneEndedMessage>((publisher, message) =>
+            {
+                sceneIndex++;
+
+                if (sceneIndex == scenes.Count)
+                {
+                    Exit();
+                }
+            });
         }
 
         protected override void Initialize()
@@ -73,46 +86,66 @@ namespace Ovow.Framework
         {
             base.LoadContent();
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            this.scenes.ForEach(scene => scene.Load(Content));
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            ovowGameComponents
-                .ToList()
-                .ForEach(c => c.Update(gameTime));
+            ActiveScene?.Update(gameTime);
 
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
             this.spriteBatch.Begin();
 
-            ovowGameComponents
-                .Where(c => c is IVisibleComponent)
-                .Select(c => c as IVisibleComponent)
-                .ToList()
-                .ForEach(vc => vc.Draw(gameTime, this.spriteBatch));
+            ActiveScene?.Draw(gameTime, this.spriteBatch);
 
             this.spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        public void AddGameComponent(IComponent component)
-        {
-            this.ovowGameComponents.Add(component);
-        }
+        public void Add(IScene item) => scenes.Add(item);
 
-        public IEnumerable<IComponent> OvowGameComponents => this.ovowGameComponents;
+        protected void Add<TScene>()
+            where TScene: Scene
+            => Add((TScene)Activator.CreateInstance(typeof(TScene), this));
 
-        public IEnumerable<Scene> Scenes => throw new NotImplementedException();
+        /// <summary>
+        /// Removes all items from the <see cref="T:System.Collections.Generic.ICollection`1" />.
+        /// </summary>
+        public void Clear() => scenes.Clear();
+
+        public bool Contains(IScene item) => scenes.Contains(item);
+
+        public void CopyTo(IScene[] array, int arrayIndex) => scenes.CopyTo(array, arrayIndex);
+
+        public bool Remove(IScene item) => scenes.Remove(item);
+
+        public IEnumerator<IScene> GetEnumerator() => scenes.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => scenes.GetEnumerator();
 
         public IMessageDispatcher MessageDispatcher => messageDispatcher;
+
+        public int Count => scenes.Count;
+
+        public bool IsReadOnly => false;
+
+        public IScene ActiveScene
+        {
+            get
+            {
+                if (sceneIndex >= scenes.Count)
+                {
+                    return null;
+                }
+
+                return scenes[sceneIndex];
+            }
+        }
     }
 }

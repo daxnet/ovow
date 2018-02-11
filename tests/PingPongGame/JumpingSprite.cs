@@ -13,7 +13,7 @@ namespace PingPongGame
     public class JumpingSprite : Sprite
     {
 
-        public JumpingSprite(IOvowGame game, Texture2D texture, Vector2 position, int dx, int dy) : base(game, texture, position)
+        public JumpingSprite(IScene scene, Texture2D texture, Vector2 position, int dx, int dy) : base(scene, texture, position)
         {
             this.DX = dx;
             this.DY = dy;
@@ -103,12 +103,12 @@ namespace PingPongGame
 
         public override void Update(GameTime gameTime)
         {
-            if (this.X + this.DX <= 0 || this.X + this.DX >= game.GraphicsDevice.Viewport.Width - this.Width)
+            if (this.X + this.DX <= 0 || this.X + this.DX >= Scene.Game.GraphicsDevice.Viewport.Width - this.Width)
             {
                 this.DX *= -1;
             }
 
-            if (this.Y + this.DY <= 0 || this.Y + this.DY >= game.GraphicsDevice.Viewport.Height - this.Height)
+            if (this.Y + this.DY <= 0 || this.Y + this.DY >= Scene.Game.GraphicsDevice.Viewport.Height - this.Height)
             {
                 this.DY *= -1;
             }

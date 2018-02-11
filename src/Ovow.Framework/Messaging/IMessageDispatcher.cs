@@ -11,7 +11,7 @@ namespace Ovow.Framework.Messaging
         void RegisterHandler<TMessage>(Action<object, TMessage> handler)
             where TMessage : IMessage;
 
-        void DispatchMessage<TMessage>(object publisher, TMessage message)
+        Task DispatchMessageAsync<TMessage>(object publisher, TMessage message)
             where TMessage : IMessage;
     }
 }

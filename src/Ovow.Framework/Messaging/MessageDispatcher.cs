@@ -13,7 +13,16 @@ namespace Ovow.Framework.Messaging
 
         public MessageDispatcher() { }
 
-        public void DispatchMessage<TMessage>(object publisher, TMessage message) 
+        public Task DispatchMessageAsync<TMessage>(object publisher, TMessage message) 
+            where TMessage : IMessage
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                DispatchMessageSync(publisher, message);
+            });
+        }
+
+        public void DispatchMessageSync<TMessage>(object publisher, TMessage message)
             where TMessage : IMessage
         {
             if (messageHandlers.TryGetValue(typeof(TMessage), out var handlers))

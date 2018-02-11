@@ -9,15 +9,15 @@ namespace Ovow.Framework.Services
     {
         private static readonly CollisionDetector detector = new CollisionDetector();
 
-        public CollisionDetectionService(IOvowGame game)
-            : base(game)
+        public CollisionDetectionService(IScene scene)
+            : base(scene)
         {
 
         }
 
         public override void Update(GameTime gameTime)
         {
-            var list = this.Game.OvowGameComponents.Where(c => c is IVisibleComponent).ToList();
+            var list = Scene.Where(c => c is IVisibleComponent).ToList();
             var aArray = new IVisibleComponent[list.Count];
             var bArray = new IVisibleComponent[list.Count];
             list.CopyTo(aArray);
@@ -34,7 +34,7 @@ namespace Ovow.Framework.Services
                     if (detector.Collides(elementA, elementB, out var infoA, out var infoB, true))
                     {
                         var message = new CollisionDetectedMessage(elementA, elementB, infoA, infoB);
-                        this.Game.MessageDispatcher.DispatchMessage(this, message);
+                        this.Publish(message);
                     }
                 }
             }

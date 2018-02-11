@@ -9,8 +9,8 @@
     <ProjectGuid>{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestGame</RootNamespace>
-    <AssemblyName>TestGame</AssemblyName>
+    <RootNamespace>PingPongGame</RootNamespace>
+    <AssemblyName>PingPongGame</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MonoGamePlatform>DesktopGL</MonoGamePlatform>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -44,6 +44,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Game1.cs" />
+    <Compile Include="GameOverScene.cs" />
+    <Compile Include="GameScene.cs" />
     <Compile Include="JumpingSprite.cs" />
     <Compile Include="Messages\MovingMessage.cs" />
     <Compile Include="Messages\ResetLocationMessage.cs" />

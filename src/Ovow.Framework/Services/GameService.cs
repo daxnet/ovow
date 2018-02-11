@@ -4,18 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Ovow.Framework.Messaging;
 
 namespace Ovow.Framework.Services
 {
     public abstract class GameService : Component, IGameService
     {
-        private readonly IOvowGame game;
+        private readonly IScene scene;
 
-        protected GameService(IOvowGame game)
+        protected GameService(IScene scene)
         {
-            this.game = game;
+            this.scene = scene;
         }
 
-        public IOvowGame Game => game;
+        public IScene Scene => scene;
+
+        public void Publish<TMessage>(TMessage message) where TMessage : IMessage
+        {
+            scene.Game.MessageDispatcher.DispatchMessageAsync(this, message);
+        }
     }
 }

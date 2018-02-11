@@ -20,8 +20,8 @@ namespace Ovow.Framework.Services
             var heightOther = b.Texture.Height;
 
             if (byPixel &&                                // if we need per pixel
-                ((Math.Min(widthOther, heightOther) > 16) ||  // at least avoid doing it
-                (Math.Min(widthMe, heightMe) > 16)))          // for small sizes (nobody will notice :P)
+                ((Math.Min(widthOther, heightOther) > 96) ||  // at least avoid doing it
+                (Math.Min(widthMe, heightMe) > 96)))          // for small sizes (nobody will notice :P)
             {
                 return SimpleIntersects(a.BoundingBox, b.BoundingBox, out ciA, out ciB)
                     && PerPixelCollision(a, b);

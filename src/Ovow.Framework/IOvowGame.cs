@@ -9,13 +9,9 @@ using System.Threading.Tasks;
 
 namespace Ovow.Framework
 {
-    public interface IOvowGame
+    public interface IOvowGame : ICollection<IScene>
     {
-        void AddGameComponent(IComponent component);
-
-        IEnumerable<Scene> Scenes { get; }
-
-        IEnumerable<IComponent> OvowGameComponents { get; }
+        IScene ActiveScene { get; }
 
         IMessageDispatcher MessageDispatcher { get; }
 
