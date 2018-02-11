@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace Ovow.Framework.Messaging.GeneralMessages
 {
-    public sealed class ReachBoundaryMessage : Message
+    public sealed class SceneEndedMessage : Message
     {
-        public ReachBoundaryMessage(Boundary boundary)
+        public SceneEndedMessage(IScene scene)
         {
-            this.ReachedBoundary = boundary;
+            this.Scene = scene;
         }
 
-        public Boundary ReachedBoundary { get; }
+        public IScene Scene { get; }
     }
 }

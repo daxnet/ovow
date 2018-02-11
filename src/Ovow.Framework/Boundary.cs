@@ -18,21 +18,17 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace Ovow.Framework
 {
-    public class Sprite : VisibleComponent
+    [Flags]
+    public enum Boundary
     {
-        public Sprite(IOvowGame game, Texture2D texture, Vector2 position)
-            : base(game, texture, position)
-        {
-        }
-
-        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            spriteBatch.Draw(Texture, Position, Color.Wheat);
-        }
+        None = 0,
+        Top = 1,
+        Left = 2,
+        Bottom = 4,
+        Right = 8
     }
 }

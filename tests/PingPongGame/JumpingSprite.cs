@@ -22,14 +22,14 @@ namespace PingPongGame
             {
                 if (publisher == this)
                 {
-                    if ((message.ReachedBoundary & ReachBoundaryMessage.Boundary.Left) == ReachBoundaryMessage.Boundary.Left ||
-                    (message.ReachedBoundary & ReachBoundaryMessage.Boundary.Right) == ReachBoundaryMessage.Boundary.Right)
+                    if ((message.ReachedBoundary & Boundary.Left) == Boundary.Left ||
+                    (message.ReachedBoundary & Boundary.Right) == Boundary.Right)
                     {
                         DX *= -1;
                     }
 
-                    if ((message.ReachedBoundary & ReachBoundaryMessage.Boundary.Top) == ReachBoundaryMessage.Boundary.Top ||
-                    (message.ReachedBoundary & ReachBoundaryMessage.Boundary.Bottom) == ReachBoundaryMessage.Boundary.Bottom)
+                    if ((message.ReachedBoundary & Boundary.Top) == Boundary.Top ||
+                    (message.ReachedBoundary & Boundary.Bottom) == Boundary.Bottom)
                     {
                         DY *= -1;
                     }

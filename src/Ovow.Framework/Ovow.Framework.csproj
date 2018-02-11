@@ -44,7 +44,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Boundary.cs" />
     <Compile Include="Component.cs" />
+    <Compile Include="IScene.cs" />
+    <Compile Include="Messaging\GeneralMessages\SceneEndedMessage.cs" />
     <Compile Include="Orientation.cs" />
     <Compile Include="IOvowGame.cs" />
     <Compile Include="Messaging\GeneralMessages\ReachBoundaryMessage.cs" />
