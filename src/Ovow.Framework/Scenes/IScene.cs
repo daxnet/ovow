@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ovow.Framework
+namespace Ovow.Framework.Scenes
 {
     public interface IScene : ICollection<IComponent>, IVisibleComponent
     {

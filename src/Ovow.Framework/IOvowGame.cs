@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework.Messaging;
+using Ovow.Framework.Scenes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

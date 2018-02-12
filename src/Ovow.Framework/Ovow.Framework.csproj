@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="Boundary.cs" />
     <Compile Include="Component.cs" />
-    <Compile Include="IScene.cs" />
+    <Compile Include="Scenes\IScene.cs" />
     <Compile Include="Messaging\GeneralMessages\SceneEndedMessage.cs" />
     <Compile Include="Orientation.cs" />
     <Compile Include="IOvowGame.cs" />
@@ -63,13 +63,16 @@
     <Compile Include="IVisibleComponent.cs" />
     <Compile Include="OvowGameWindowSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scene.cs" />
+    <Compile Include="Scenes\ITransition.cs" />
+    <Compile Include="Scenes\Scene.cs" />
     <Compile Include="Services\CollisionDetectionService.cs" />
     <Compile Include="Services\CollisionDetector.cs" />
     <Compile Include="Services\CollisionInfo.cs" />
     <Compile Include="Services\GameService.cs" />
     <Compile Include="Services\IGameService.cs" />
-    <Compile Include="Sprite.cs" />
+    <Compile Include="Sprites\Sprite.cs" />
+    <Compile Include="Sprites\Text.cs" />
+    <Compile Include="Sprites\TextRenderingOptions.cs" />
     <Compile Include="VisibleComponent.cs" />
   </ItemGroup>
   <ItemGroup>

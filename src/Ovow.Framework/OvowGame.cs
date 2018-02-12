@@ -23,6 +23,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Ovow.Framework.Messaging;
 using Ovow.Framework.Messaging.GeneralMessages;
+using Ovow.Framework.Scenes;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,6 +33,7 @@ namespace Ovow.Framework
 {
     public class OvowGame : Game, IOvowGame
     {
+        private static readonly object sync = new object();
         private readonly GraphicsDeviceManager graphicsDeviceManager;
         private readonly OvowGameWindowSettings windowSettings;
         private readonly IMessageDispatcher messageDispatcher = new MessageDispatcher();
@@ -52,11 +54,20 @@ namespace Ovow.Framework
 
             this.messageDispatcher.RegisterHandler<SceneEndedMessage>((publisher, message) =>
             {
-                sceneIndex++;
-
-                if (sceneIndex == scenes.Count)
+                if (message.Scene == this.scenes[sceneIndex])
                 {
-                    Exit();
+                    lock (sync)
+                    {
+                        if (message.Scene == this.scenes[sceneIndex])
+                        {
+                            sceneIndex++;
+
+                            if (sceneIndex == scenes.Count)
+                            {
+                                Exit();
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -111,7 +122,7 @@ namespace Ovow.Framework
         public void Add(IScene item) => scenes.Add(item);
 
         protected void Add<TScene>()
-            where TScene: Scene
+            where TScene : Scene
             => Add((TScene)Activator.CreateInstance(typeof(TScene), this));
 
         /// <summary>

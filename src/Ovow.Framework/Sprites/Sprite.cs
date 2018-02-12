@@ -20,8 +20,9 @@
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Ovow.Framework.Scenes;
 
-namespace Ovow.Framework
+namespace Ovow.Framework.Sprites
 {
     public class Sprite : VisibleComponent
     {

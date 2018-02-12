@@ -22,6 +22,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework.Messaging;
 using Ovow.Framework.Messaging.GeneralMessages;
+using Ovow.Framework.Scenes;
 using System;
 
 namespace Ovow.Framework

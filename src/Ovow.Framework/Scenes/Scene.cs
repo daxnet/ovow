@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -10,7 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework.Messaging;
 using Ovow.Framework.Messaging.GeneralMessages;
 
-namespace Ovow.Framework
+namespace Ovow.Framework.Scenes
 {
     public abstract class Scene : IScene
     {
@@ -19,6 +21,7 @@ namespace Ovow.Framework
         private readonly Texture2D sceneTexture;
         private readonly List<IComponent> gameComponents = new List<IComponent>();
         private volatile bool ended = false;
+        private static readonly object endingSyncLock = new object();
 
         protected Scene(IOvowGame game)
             : this(game, null, Color.CornflowerBlue)
@@ -94,9 +97,15 @@ namespace Ovow.Framework
         {
             if (!ended)
             {
-                Clear();
-                Publish(new SceneEndedMessage(this));
-                ended = true;
+                lock (endingSyncLock)
+                {
+                    if (!ended)
+                    {
+                        Clear();
+                        Publish(new SceneEndedMessage(this));
+                        ended = true;
+                    }
+                }
             }
         }
 
