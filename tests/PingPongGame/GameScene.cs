@@ -6,6 +6,7 @@ using Ovow.Framework;
 using Ovow.Framework.Messaging.GeneralMessages;
 using Ovow.Framework.Scenes;
 using Ovow.Framework.Services;
+using Ovow.Framework.Transitions;
 using System;
 using System.Threading;
 
@@ -16,10 +17,7 @@ namespace PingPongGame
         private const int NumOfBalls = 3;
         private const int MaxDelta = 15;
 
-        private TimeSpan ts = TimeSpan.Zero;
-
         private int times = 0;
-        private bool endFired = false;
         private static readonly object sync = new object();
 
         private static readonly Random rnd = new Random(DateTime.UtcNow.Millisecond);
@@ -38,6 +36,8 @@ namespace PingPongGame
                     }
                 }
             });
+
+            Out = new DelayTransition(this, TimeSpan.FromMilliseconds(100));
         }
 
         public override void Load(ContentManager contentManager)
@@ -59,23 +59,14 @@ namespace PingPongGame
                 this.Add(footballSprite);
             }
 
-           this.Add(new CollisionDetectionService(this));
+            this.Add(new CollisionDetectionService(this));
         }
 
         public override void Update(GameTime gameTime)
         {
             if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
-                endFired = true;
-            }
-
-            if (endFired)
-            {
-                ts += gameTime.ElapsedGameTime;
-                if (ts > TimeSpan.FromMilliseconds(150))
-                {
-                    End();
-                }
+                End();
             }
 
             base.Update(gameTime);

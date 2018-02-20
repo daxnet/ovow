@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework.Messaging;
 using Ovow.Framework.Messaging.GeneralMessages;
+using Ovow.Framework.Transitions;
 
 namespace Ovow.Framework.Scenes
 {
@@ -21,6 +18,7 @@ namespace Ovow.Framework.Scenes
         private readonly Texture2D sceneTexture;
         private readonly List<IComponent> gameComponents = new List<IComponent>();
         private volatile bool ended = false;
+        private volatile bool ending = false;
         private static readonly object endingSyncLock = new object();
 
         protected Scene(IOvowGame game)
@@ -70,6 +68,10 @@ namespace Ovow.Framework.Scenes
 
         public Guid Id => id;
 
+        public ITransition In { get; protected set; }
+
+        public ITransition Out { get; protected set; }
+
         public void Add(IComponent item)
         {
             gameComponents.Add(item);
@@ -91,6 +93,11 @@ namespace Ovow.Framework.Scenes
                 .ToList()
                 .ForEach(vc => vc.Draw(gameTime, spriteBatch));
 
+            if (this.ending && !this.ended && this.Out != null)
+            {
+                this.Out.Draw(gameTime, spriteBatch);
+            }
+
         }
 
         public virtual void End()
@@ -101,9 +108,11 @@ namespace Ovow.Framework.Scenes
                 {
                     if (!ended)
                     {
-                        Clear();
-                        Publish(new SceneEndedMessage(this));
-                        ended = true;
+                        ending = true;
+                        if (this.Out == null)
+                        {
+                            DoEnd();
+                        }
                     }
                 }
             }
@@ -143,8 +152,24 @@ namespace Ovow.Framework.Scenes
             gameComponents
                 .ToList()
                 .ForEach(c => c.Update(gameTime));
+
+            if (ending && !ended && this.Out != null)
+            {
+                this.Out.Update(gameTime);
+                if (this.Out.Ended)
+                {
+                    DoEnd();
+                }
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator() => gameComponents.GetEnumerator();
+
+        private void DoEnd()
+        {
+            Clear();
+            Publish(new SceneEndedMessage(this));
+            ended = true;
+        }
     }
 }

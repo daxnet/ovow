@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using Ovow.Framework.Transitions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,10 @@ namespace Ovow.Framework.Scenes
     public interface IScene : ICollection<IComponent>, IVisibleComponent
     {
         IOvowGame Game { get; }
+
+        ITransition In { get; }
+
+        ITransition Out { get; }
 
         void Load(ContentManager contentManager);
 

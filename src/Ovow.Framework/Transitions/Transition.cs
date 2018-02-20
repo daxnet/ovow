@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework.Messaging;
+using Ovow.Framework.Scenes;
 
-namespace Ovow.Framework.Scenes
+namespace Ovow.Framework.Transitions
 {
     public abstract class Transition : ITransition
     {
@@ -28,29 +29,38 @@ namespace Ovow.Framework.Scenes
 
         public IScene Scene { get; }
 
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
-        {
-            throw new NotImplementedException();
-        }
+        public bool Ended { get; protected set; }
+
+        public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        { }
 
         public bool Equals(IComponent other)
         {
-            throw new NotImplementedException();
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            var transition = other as ITransition;
+            if (transition == null)
+            {
+                return false;
+            }
+
+            return this.id.Equals(transition.Id);
         }
 
         public void Publish<TMessage>(TMessage message) where TMessage : IMessage
         {
-            throw new NotImplementedException();
+            this.Scene?.Game?.MessageDispatcher.DispatchMessageAsync(this, message);
         }
 
         public void Subscribe<TMessage>(Action<object, TMessage> handler) where TMessage : IMessage
         {
-            throw new NotImplementedException();
+            this.Scene?.Game.MessageDispatcher.RegisterHandler(handler);
         }
 
-        public void Update(GameTime gameTime)
-        {
-            throw new NotImplementedException();
-        }
+        public virtual void Update(GameTime gameTime)
+        { }
     }
 }

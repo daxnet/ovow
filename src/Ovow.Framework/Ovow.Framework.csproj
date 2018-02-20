@@ -63,9 +63,10 @@
     <Compile Include="IVisibleComponent.cs" />
     <Compile Include="OvowGameWindowSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scenes\ITransition.cs" />
+    <Compile Include="Transitions\DelayTransition.cs" />
+    <Compile Include="Transitions\ITransition.cs" />
     <Compile Include="Scenes\Scene.cs" />
-    <Compile Include="Scenes\Transition.cs" />
+    <Compile Include="Transitions\Transition.cs" />
     <Compile Include="Services\CollisionDetectionService.cs" />
     <Compile Include="Services\CollisionDetector.cs" />
     <Compile Include="Services\CollisionInfo.cs" />
