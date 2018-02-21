@@ -11,6 +11,7 @@ namespace PingPongGame
     internal sealed class GameOverScene : Scene
     {
         private const string Message = "Press ESC to Exit...";
+        private SpriteFont font;
 
         public GameOverScene(IOvowGame game)
             : base(game, Color.MediumVioletRed)
@@ -18,7 +19,7 @@ namespace PingPongGame
 
         public override void Load(ContentManager contentManager)
         {
-            var font = contentManager.Load<SpriteFont>("text");
+            font = contentManager.Load<SpriteFont>("text");
             this.Add(new Text(Message, this, font, new TextRenderingOptions(false, Color.Yellow), new Vector2(100, 100)));
         }
 

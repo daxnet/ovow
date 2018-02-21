@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Ovow.Framework
 {
-    public interface IOvowGame : ICollection<IScene>
+    public interface IOvowGame : ICollection<IScene>, IDisposable
     {
         IScene ActiveScene { get; }
 

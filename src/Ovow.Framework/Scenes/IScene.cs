@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Ovow.Framework.Scenes
 {
-    public interface IScene : ICollection<IComponent>, IVisibleComponent
+    public interface IScene : ICollection<IComponent>, IVisibleComponent, IDisposable
     {
         IOvowGame Game { get; }
 

@@ -171,5 +171,23 @@ namespace Ovow.Framework.Scenes
             Publish(new SceneEndedMessage(this));
             ended = true;
         }
+
+        #region IDisposable Support
+        protected virtual void Dispose(bool disposing) { }
+
+        ~Scene()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        #endregion
+
     }
 }

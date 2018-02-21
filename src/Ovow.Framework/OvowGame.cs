@@ -158,5 +158,24 @@ namespace Ovow.Framework
                 return scenes[sceneIndex];
             }
         }
+
+        private bool disposed = false;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    foreach(var scene in scenes)
+                    {
+                        scene.Dispose();
+                    }
+                }
+
+                base.Dispose(disposing);
+                disposed = true;
+            }
+        }
     }
 }

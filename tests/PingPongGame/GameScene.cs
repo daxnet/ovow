@@ -8,41 +8,41 @@ using Ovow.Framework.Scenes;
 using Ovow.Framework.Services;
 using Ovow.Framework.Transitions;
 using System;
-using System.Threading;
 
 namespace PingPongGame
 {
     internal sealed class GameScene : Scene
     {
-        private const int NumOfBalls = 3;
-        private const int MaxDelta = 15;
+        private const int NumOfBalls = 10;
+        private const int MaxDelta = 25;
 
         private int times = 0;
         private static readonly object sync = new object();
 
         private static readonly Random rnd = new Random(DateTime.UtcNow.Millisecond);
+        private Texture2D spriteTexture;
 
         public GameScene(IOvowGame game)
             : base(game)
         {
-            Subscribe<CollisionDetectedMessage>((publisher, message) =>
-            {
-                lock (sync)
-                {
-                    times++;
-                    if (times >= 10)
-                    {
-                        End();
-                    }
-                }
-            });
+            //Subscribe<CollisionDetectedMessage>((publisher, message) =>
+            //{
+            //    lock (sync)
+            //    {
+            //        times++;
+            //        if (times >= 10)
+            //        {
+            //            End();
+            //        }
+            //    }
+            //});
 
-            Out = new DelayTransition(this, TimeSpan.FromMilliseconds(100));
+            Out = new DelayTransition(this, TimeSpan.FromMilliseconds(200));
         }
 
         public override void Load(ContentManager contentManager)
         {
-            Texture2D spriteTexture = contentManager.Load<Texture2D>("football");
+            spriteTexture = contentManager.Load<Texture2D>("football");
 
             var screenWidth = Game.GraphicsDevice.Viewport.Width;
             var screenHeight = Game.GraphicsDevice.Viewport.Height;
@@ -70,6 +70,21 @@ namespace PingPongGame
             }
 
             base.Update(gameTime);
+        }
+
+
+        private bool disposed = false;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    spriteTexture.Dispose();
+                }
+                disposed = true;
+            }
         }
     }
 }
