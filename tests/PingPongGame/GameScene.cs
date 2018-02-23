@@ -14,9 +14,9 @@ namespace PingPongGame
     internal sealed class GameScene : Scene
     {
         private const int NumOfBalls = 10;
-        private const int MaxDelta = 25;
+        private const int MaxDelta = 15;
 
-        private int times = 0;
+        // private int times = 0;
         private static readonly object sync = new object();
 
         private static readonly Random rnd = new Random(DateTime.UtcNow.Millisecond);

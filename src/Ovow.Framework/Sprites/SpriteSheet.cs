@@ -18,39 +18,183 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+
 namespace Ovow.Framework.Sprites
 {
     /// <summary>
     /// Represents the data structure of a Sprite Sheet.
     /// </summary>
-    public struct SpriteSheet
+    public class SpriteSheet : IDisposable
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SpriteSheet"/> struct.
-        /// </summary>
-        /// <param name="frameWidth">Width of each frame in the sprite sheet.</param>
-        /// <param name="frameHeight">Height of each frame in the sprite sheet.</param>
-        /// <param name="totalFrames">The total frames in the sprite sheet.</param>
-        /// <param name="offsetX">The offset x-coordinate of the sprite sheet.</param>
-        /// <param name="offsetY">The offset y-coordinate of the sprite sheet.</param>
-        public SpriteSheet(int frameWidth, int frameHeight, int totalFrames, int offsetX, int offsetY)
-            : this()
+        private readonly Bitmap bitmap;
+
+        private SpriteSheet(string fileName, Color backgroundColor = default(Color))
         {
-            this.FrameWidth = frameWidth;
-            this.FrameHeight = frameHeight;
-            this.TotalFrames = totalFrames;
-            this.OffsetX = offsetX;
-            this.OffsetY = offsetY;
+            this.bitmap = (Bitmap)Image.FromFile(fileName);
+            this.Width = this.bitmap.Width;
+            this.Height = this.bitmap.Height;
+            this.BackgroundColor = backgroundColor;
         }
 
-        public int FrameWidth { get; set; }
+        public int Width { get; }
 
-        public int FrameHeight { get; set; }
+        public int Height { get; }
 
-        public int TotalFrames { get; set; }
+        public Color BackgroundColor { get; }
 
-        public int OffsetX { get; set; }
+        public int[,] GetMaskMatrix()
+        {
+            var result = new int[Width, Height];
+            for (var i = 0; i < Width; i++)
+            {
+                for (var j = 0; j < Height; j++)
+                {
+                    result[i, j] = IsBackgroundPixel(i, j) ? 0 : 1;
+                }
+            }
+            return result;
+        }
 
-        public int OffsetY { get; set; }
+        public int[,] GetEdgeMatrix()
+        {
+            var result = new int[Width, Height];
+            for (var i = 0; i < Width; i++)
+            {
+                for (var j = 0; j < Height; j++)
+                {
+                    result[i, j] = IsEdgePixel(i, j) ? 1 : 0;
+                }
+            }
+
+            return result;
+        }
+
+        public IEnumerable<KeyValuePair<int, List<Point>>> GetIsland()
+        {
+            var edgeMatrix = GetEdgeMatrix();
+            var index = 0;
+            var result = new Dictionary<int, List<Point>>();
+
+            for (var x = 0; x < Width; x++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    if (edgeMatrix[x, y] == 1)
+                    {
+                        var list = new List<Point>();
+                        MarkIsland(edgeMatrix, x, y, index++, ref list);
+                        result.Add(index, list);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private bool IsEdgePixel(int x, int y)
+        {
+            var hasBackgroundPixelAround = false;
+            var hasMaskPixelAround = false;
+
+            for (var px = Math.Max(x - 1, 0); px <= Math.Min(x + 1, Width - 1); px++)
+            {
+                for (var py = Math.Max(y - 1, 0); py <= Math.Min(y + 1, Height - 1); py++)
+                {
+                    if (px == x && py == y)
+                    {
+                        continue;
+                    }
+
+                    if (IsBackgroundPixel(px, py))
+                    {
+                        hasBackgroundPixelAround = true;
+                    }
+                    else
+                    {
+                        hasMaskPixelAround = true;
+                    }
+                }
+            }
+
+            return hasBackgroundPixelAround && hasMaskPixelAround;
+        }
+
+        private bool IsBackgroundPixel(int x, int y)
+            => BackgroundColor == default(Color) ? bitmap.GetPixel(x, y).A == 0 : bitmap.GetPixel(x, y) == BackgroundColor;
+
+        private void MarkIsland(int[,] edgeMatrix, int x, int y, int index, ref List<Point> coordinates)
+        {
+            edgeMatrix[x, y] = -1;
+            coordinates.Add(new Point(x, y));
+
+            if (x - 1 >= 0)
+            {
+                // (i-1, j-1)
+                if (y - 1 >= 0 && edgeMatrix[x - 1, y - 1] == 1)
+                    MarkIsland(edgeMatrix, x - 1, y - 1, index, ref coordinates);
+                // (i-1, j)
+                if (edgeMatrix[x - 1, y] == 1)
+                    MarkIsland(edgeMatrix, x - 1, y, index, ref coordinates);
+                // (i-1, j+1)
+                if (y + 1 < Height && edgeMatrix[x - 1, y + 1] == 1)
+                    MarkIsland(edgeMatrix, x - 1, y + 1, index, ref coordinates);
+            }
+            if (x + 1 < Width)
+            {
+                // (i+1, j-1)
+                if (y - 1 >= 0 && edgeMatrix[x + 1, y - 1] == 1)
+                    MarkIsland(edgeMatrix, x + 1, y - 1, index, ref coordinates);
+                // (i+1, j)
+                if (edgeMatrix[x + 1, y] == 1)
+                    MarkIsland(edgeMatrix, x + 1, y, index, ref coordinates);
+                // (i+1, j+1)
+                if (y + 1 < Height && edgeMatrix[x + 1, y + 1] == 1)
+                    MarkIsland(edgeMatrix, x + 1, y + 1, index, ref coordinates);
+            }
+            // (i, j-1)
+            if (y - 1 >= 0 && edgeMatrix[x, y - 1] == 1)
+                MarkIsland(edgeMatrix, x, y - 1, index, ref coordinates);
+            // (i, j+1)
+            if (y + 1 < Height && edgeMatrix[x, y + 1] == 1)
+                MarkIsland(edgeMatrix, x, y + 1, index, ref coordinates);
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~SpriteSheet() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 }
