@@ -19,79 +19,172 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
+using System.ComponentModel;
 
 namespace Ovow.Framework.Sprites
 {
     /// <summary>
     /// Represents the data structure of a Sprite Sheet.
     /// </summary>
-    public class SpriteSheet : IDisposable
+    public class SpriteSheet : IDisposable, INotifyPropertyChanged
     {
         private readonly Bitmap bitmap;
+        private int[,] maskMatrix;
+        private int[,] edgeMatrix;
+        private Color backgroundColor;
+        private IEnumerable<KeyValuePair<int, List<Point>>> islands;
 
         private SpriteSheet(string fileName, Color backgroundColor = default(Color))
         {
             this.bitmap = (Bitmap)Image.FromFile(fileName);
             this.Width = this.bitmap.Width;
             this.Height = this.bitmap.Height;
-            this.BackgroundColor = backgroundColor;
+            this.backgroundColor = backgroundColor;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public int Width { get; }
 
         public int Height { get; }
 
-        public Color BackgroundColor { get; }
-
-        public int[,] GetMaskMatrix()
+        public Color BackgroundColor
         {
-            var result = new int[Width, Height];
-            for (var i = 0; i < Width; i++)
+            get { return this.backgroundColor; }
+            set
             {
-                for (var j = 0; j < Height; j++)
-                {
-                    result[i, j] = IsBackgroundPixel(i, j) ? 0 : 1;
-                }
+                this.backgroundColor = value;
+                this.maskMatrix = null;
+                this.edgeMatrix = null;
+                this.islands = null;
+
+                this.NotifyPropertyChanged("BackgroundColor");
             }
-            return result;
         }
 
-        public int[,] GetEdgeMatrix()
+        public int[,] MaskMatrix
         {
-            var result = new int[Width, Height];
-            for (var i = 0; i < Width; i++)
+            get
             {
-                for (var j = 0; j < Height; j++)
+                if (this.maskMatrix == null)
                 {
-                    result[i, j] = IsEdgePixel(i, j) ? 1 : 0;
-                }
-            }
-
-            return result;
-        }
-
-        public IEnumerable<KeyValuePair<int, List<Point>>> GetIsland()
-        {
-            var edgeMatrix = GetEdgeMatrix();
-            var index = 0;
-            var result = new Dictionary<int, List<Point>>();
-
-            for (var x = 0; x < Width; x++)
-            {
-                for (var y = 0; y < Height; y++)
-                {
-                    if (edgeMatrix[x, y] == 1)
+                    var result = new int[Width, Height];
+                    for (var i = 0; i < Width; i++)
                     {
-                        var list = new List<Point>();
-                        MarkIsland(edgeMatrix, x, y, index++, ref list);
-                        result.Add(index, list);
+                        for (var j = 0; j < Height; j++)
+                        {
+                            result[i, j] = IsBackgroundPixel(i, j) ? 0 : 1;
+                        }
                     }
+
+                    this.maskMatrix = result;
+                }
+
+                return this.maskMatrix;
+            }
+        }
+
+        public int[,] EdgeMatrix
+        {
+            get
+            {
+                if (this.edgeMatrix == null)
+                {
+                    var result = new int[Width, Height];
+                    for (var i = 0; i < Width; i++)
+                    {
+                        for (var j = 0; j < Height; j++)
+                        {
+                            result[i, j] = IsEdgePixel(i, j) ? 1 : 0;
+                        }
+                    }
+
+                    this.edgeMatrix = result;
+                }
+
+                return this.edgeMatrix;
+            }
+        }
+
+        public IEnumerable<KeyValuePair<int, List<Point>>> Islands
+        {
+            get
+            {
+                if (this.islands == null)
+                {
+                    var edgeMatrix = EdgeMatrix;
+                    var index = 0;
+                    var result = new Dictionary<int, List<Point>>();
+
+                    for (var x = 0; x < Width; x++)
+                    {
+                        for (var y = 0; y < Height; y++)
+                        {
+                            if (edgeMatrix[x, y] == 1)
+                            {
+                                var list = new List<Point>();
+                                MarkIsland(edgeMatrix, x, y, index++, ref list);
+                                result.Add(index, list);
+                            }
+                        }
+                    }
+
+                    this.islands = result;
+                }
+
+                return this.islands;
+            }
+        }
+
+        public Image Bitmap => bitmap;
+
+        public IEnumerable<KeyValuePair<int, Tuple<Point, Point>>> IslandBoundingBoxes
+        {
+            get
+            {
+                foreach (var island in Islands)
+                {
+                    yield return new KeyValuePair<int, Tuple<Point, Point>>(island.Key, new Tuple<Point, Point>(
+                            new Point(island.Value.Select(_ => _.X).Min(), island.Value.Select(_ => _.Y).Min()),
+                            new Point(island.Value.Select(_ => _.X).Max(), island.Value.Select(_ => _.Y).Max())
+                        ));
                 }
             }
+        }
 
-            return result;
+        public IEnumerable<KeyValuePair<int, Tuple<Point, Point>>> SpriteBoundingBoxes
+        {
+            get
+            {
+                var result = new Dictionary<int, Tuple<Point, Point>>();
+                var islandBoundingBoxes = IslandBoundingBoxes;
+
+                foreach (var boundingBox in islandBoundingBoxes)
+                {
+                    if (islandBoundingBoxes.Any(bb =>
+                        bb.Value.Item1.X < boundingBox.Value.Item1.X &&
+                        bb.Value.Item1.Y < boundingBox.Value.Item1.Y &&
+                        bb.Value.Item2.X > boundingBox.Value.Item2.X &&
+                        bb.Value.Item2.Y > boundingBox.Value.Item2.Y))
+                    {
+                        continue;
+                    }
+
+                    result.Add(boundingBox.Key, boundingBox.Value);
+                }
+                
+                return result;
+            }
+        }
+
+        public static SpriteSheet CreateFromFile(string fileName, Color transparentColor = default(Color)) => new SpriteSheet(fileName, transparentColor);
+
+        private void NotifyPropertyChanged(string propertyName)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private bool IsEdgePixel(int x, int y)
@@ -122,8 +215,7 @@ namespace Ovow.Framework.Sprites
             return hasBackgroundPixelAround && hasMaskPixelAround;
         }
 
-        private bool IsBackgroundPixel(int x, int y)
-            => BackgroundColor == default(Color) ? bitmap.GetPixel(x, y).A == 0 : bitmap.GetPixel(x, y) == BackgroundColor;
+        private bool IsBackgroundPixel(int x, int y) => BackgroundColor == default(Color) || BackgroundColor == Color.Transparent ? bitmap.GetPixel(x, y).A == 0 : bitmap.GetPixel(x, y) == BackgroundColor;
 
         private void MarkIsland(int[,] edgeMatrix, int x, int y, int index, ref List<Point> coordinates)
         {
@@ -171,7 +263,7 @@ namespace Ovow.Framework.Sprites
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
+                    this.bitmap.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
