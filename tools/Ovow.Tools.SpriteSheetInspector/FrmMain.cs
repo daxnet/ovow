@@ -1,11 +1,16 @@
-﻿using Ovow.Framework.Sprites;
+﻿using Ovow.Framework;
+using Ovow.Framework.Sprites;
 using Ovow.Tools.Common;
+using Ovow.Tools.SpriteSheetInspector.Properties;
+using Ovow.Tools.SpriteSheetInspector.UserControls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,11 +20,18 @@ namespace Ovow.Tools.SpriteSheetInspector
     public partial class FrmMain : Form
     {
         private SpriteSheet spriteSheet;
-        private List<PictureBox> spriteBoundingBoxes = new List<PictureBox>();
+        private List<BorderedPictureBox> spritePictureBoxes = new List<BorderedPictureBox>();
+        private TreeNode rootNode;
+        private TreeNode spritesNode;
+        private TreeNode actionsNode;
 
         public FrmMain()
         {
             InitializeComponent();
+            this.pnlMain.MouseWheel += (s, e) => InvalidatePanel();
+            typeof(Control)
+                .GetProperty("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance)
+                .SetValue(this.pictureBox, true);
         }
 
         private void LoadSpriteSheet(string fileName)
@@ -36,9 +48,9 @@ namespace Ovow.Tools.SpriteSheetInspector
 
         private void ClearSpriteBoundingBoxes()
         {
-            if (this.spriteBoundingBoxes.Count > 0)
+            if (this.spritePictureBoxes.Count > 0)
             {
-                foreach(var bb in this.spriteBoundingBoxes)
+                foreach (var bb in this.spritePictureBoxes)
                 {
                     bb.Controls.Find("lbl", true).ToList().ForEach(c => c.Dispose());
                     bb.Controls.Clear();
@@ -46,7 +58,7 @@ namespace Ovow.Tools.SpriteSheetInspector
                 }
 
                 this.pictureBox.Controls.Clear();
-                this.spriteBoundingBoxes.Clear();
+                this.spritePictureBoxes.Clear();
             }
         }
 
@@ -55,12 +67,46 @@ namespace Ovow.Tools.SpriteSheetInspector
             using (new LengthyOperation(this))
             {
                 this.ClearSpriteBoundingBoxes();
+
+                this.imageList1.Images.Clear();
+                this.imageList1.Images.Add("root", Resources.root);
+                this.imageList1.Images.Add("sprites", Resources.sprites);
+                this.imageList1.Images.Add("actions", Resources.actions);
+                this.imageList1.Images.Add("action", Resources.action);
+
+                this.tv.Nodes.Clear();
+                this.rootNode = this.tv.Nodes.Add(Path.GetFileName(this.spriteSheet.FileName));
+                this.rootNode.ImageKey = this.rootNode.SelectedImageKey = this.rootNode.StateImageKey = "root";
+                this.spritesNode = this.rootNode.Nodes.Add("Sprites");
+                this.spritesNode.ImageKey = this.spritesNode.SelectedImageKey = this.spritesNode.StateImageKey = "sprites";
+                this.actionsNode = this.rootNode.Nodes.Add("Actions");
+                this.actionsNode.ImageKey = this.actionsNode.SelectedImageKey = this.actionsNode.StateImageKey = "actions";
+
                 foreach (var bb in this.spriteSheet.SpriteBoundingBoxes)
                 {
-                    var boundingBox = CreateBoundingBox(bb.Key, bb.Value.Item2.X - bb.Value.Item1.X, bb.Value.Item2.Y - bb.Value.Item1.Y);
-                    boundingBox.Location = new Point(bb.Value.Item1.X, bb.Value.Item1.Y);
+                    var x = bb.Value.X;
+                    var y = bb.Value.Y;
+                    var width = bb.Value.Width;
+                    var height = bb.Value.Height;
+
+                    var img = new Bitmap(width, height);
+                    using (var graphics = Graphics.FromImage(img))
+                    {
+                        graphics.DrawImage(this.spriteSheet.Bitmap, new Rectangle(0, 0, width, height), bb.Value, GraphicsUnit.Pixel);
+                    }
+
+                    imageList1.Images.Add($"Sprite_{bb.Key}", img);
+
+                    var boundingBox = CreateBoundingBox(bb.Key, width, height);
+                    boundingBox.Location = new Point(x, y);
                     this.pictureBox.Controls.Add(boundingBox);
+
+                    var spriteNode = spritesNode.Nodes.Add($"{bb.Key} ([{x},{y}] - [{x + width},{y + height}])");
+                    spriteNode.ImageKey = spriteNode.SelectedImageKey = spriteNode.StateImageKey = $"Sprite_{bb.Key}";
+                    spriteNode.Tag = bb;
                 }
+
+                tv.ExpandAll();
             }
         }
 
@@ -78,6 +124,7 @@ namespace Ovow.Tools.SpriteSheetInspector
 
                 this.propertyGrid.SelectedObject = null;
                 this.ClearSpriteBoundingBoxes();
+                this.tv.Nodes.Clear();
             }
         }
 
@@ -91,11 +138,21 @@ namespace Ovow.Tools.SpriteSheetInspector
 
         private PictureBox CreateBoundingBox(int index, int width, int height)
         {
-            var pb = new PictureBox();
+            var borderColor = Color.Black;
+            if (this.spriteSheet.BackgroundColor == Color.Transparent || this.spriteSheet.BackgroundColor == default(Color))
+            {
+                borderColor = SystemColors.Control.Inverse();
+            }
+            else
+            {
+                borderColor = this.spriteSheet.BackgroundColor.Inverse();
+            }
+
+            var pb = new BorderedPictureBox { BorderColor = borderColor };
             pb.BackColor = Color.Transparent;
             pb.Width = width;
             pb.Height = height;
-            pb.BorderStyle = BorderStyle.FixedSingle;
+            pb.ContextMenuStrip = cmsBoundingBox;
 
             var label = new Label();
             label.TextAlign = ContentAlignment.MiddleCenter;
@@ -109,10 +166,65 @@ namespace Ovow.Tools.SpriteSheetInspector
 
             pb.Controls.Add(label);
             pb.Tag = index;
+            pb.MouseClick += (mcSender, mcEventArgs) =>
+              {
+                  var idx = Convert.ToInt32(pb.Tag);
+                  this.SelectSpriteOnSheet(idx);
+                  foreach (TreeNode node in tv.Nodes[0].Nodes[0].Nodes)
+                  {
+                      var kvp = (KeyValuePair<int, Rectangle>)node.Tag;
+                      if (kvp.Key == idx)
+                      {
+                          tv.SelectedNode = node;
+                          tv.ExpandAll();
+                      }
+                  }
 
-            this.spriteBoundingBoxes.Add(pb);
+                  if (mcEventArgs.Button == MouseButtons.Right)
+                  {
+
+                  }
+              };
+
+            this.spritePictureBoxes.Add(pb);
 
             return pb;
+        }
+
+        private void SelectSpriteOnSheet(int index)
+        {
+            foreach (var pb in this.spritePictureBoxes)
+            {
+                if (Convert.ToInt32(pb.Tag) == index)
+                {
+                    pb.BackColor = Color.FromArgb(128, Color.Black);
+                }
+                else
+                {
+                    pb.BackColor = Color.Transparent;
+                }
+                pb.Refresh();
+            }
+        }
+
+        private void InvalidatePanel()
+        {
+            pictureBox.Invalidate();
+            foreach (Control control in pictureBox.Controls)
+            {
+                control.Invalidate();
+            }
+        }
+
+        private IEnumerable<string> AllActionNames
+        {
+            get
+            {
+                foreach (TreeNode node in actionsNode.Nodes)
+                {
+                    yield return node.Text;
+                }
+            }
         }
 
         private void Action_OpenSpriteSheetImage(object sender, EventArgs e)
@@ -128,9 +240,174 @@ namespace Ovow.Tools.SpriteSheetInspector
             this.UnloadSpriteSheet();
         }
 
+        private void Action_NewAction(object sender, EventArgs e)
+        {
+
+            using (var dlg = new FrmTextInput("Action Name:", AllActionNames))
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    actionsNode.Nodes.Add(dlg.InputText.Trim(), dlg.InputText.Trim(), "action", "action");
+
+                    actionsNode.Expand();
+                }
+            }
+        }
+
+        private void Action_MoveActionSpriteUp(object sender, EventArgs e)
+        {
+            tv.SelectedNode.MoveUp();
+        }
+
+        private void Action_MoveActionSpriteTop(object sender, EventArgs e)
+        {
+            tv.SelectedNode.MoveTop();
+        }
+
+        private void Action_MoveActionSpriteDown(object sender, EventArgs e)
+        {
+            tv.SelectedNode.MoveDown();
+        }
+
+        private void Action_MoveActionSpriteBottom(object sender, EventArgs e)
+        {
+            tv.SelectedNode.MoveBottom();
+        }
+
+        private void Action_DeleteActionSpriteNode(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure to delete the selected sprite?",
+                "Confirm",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+            {
+                tv.SelectedNode.RemoveEx();
+            }
+        }
+
+        private void Action_Animate(object sender, EventArgs e)
+        {
+
+        }
+
         private void FrmMain_FormClosed(object sender, FormClosedEventArgs e)
         {
             UnloadSpriteSheet();
+        }
+
+        private void tv_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            var node = e.Node;
+            if (node != null)
+            {
+                if (node.Tag is KeyValuePair<int, Rectangle> boundingBox)
+                {
+                    this.SelectSpriteOnSheet(boundingBox.Key);
+                }
+                else
+                {
+                    this.SelectSpriteOnSheet(-1);
+                }
+            }
+        }
+
+        private void pictureBox_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.SelectSpriteOnSheet(-1);
+            tv.SelectedNode = tv.Nodes[0].Nodes[0];
+        }
+
+        private void pnlMain_Click(object sender, EventArgs e)
+        {
+            this.SelectSpriteOnSheet(-1);
+            tv.SelectedNode = tv.Nodes[0].Nodes[0];
+        }
+
+        private void tv_MouseClick(object sender, MouseEventArgs e)
+        {
+            var node = tv.GetNodeAt(e.X, e.Y);
+            if (node != null)
+            {
+                tv.SelectedNode = node;
+                if (e.Button == MouseButtons.Right)
+                {
+                    if (node == actionsNode)
+                    {
+                        cmsActions.Show(tv, e.X, e.Y);
+                    }
+                    else if (node.Parent == actionsNode)
+                    {
+                        cmsAction.Show(tv, e.X, e.Y);
+                    }
+                    else if (node.Parent?.Parent == actionsNode)
+                    {
+                        cmsActionSprite.Show(tv, e.X, e.Y);
+                    }
+                }
+            }
+        }
+
+        private void pnlMain_Scroll(object sender, ScrollEventArgs e)
+        {
+            this.InvalidatePanel();
+        }
+
+        private void tv_DragEnter(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void cmsBoundingBox_Opening(object sender, CancelEventArgs e)
+        {
+            if (AllActionNames.Count() == 0)
+            {
+                cmnuAddToAction.Enabled = false;
+                return;
+            }
+
+            cmnuAddToAction.Enabled = true;
+            cmnuAddToAction.DropDownItems.Clear();
+
+            var ctrl = pictureBox.GetChildAtPoint(pictureBox.PointToClient(cmsBoundingBox.Bounds.Location));
+            var boundingBoxIndex = Convert.ToInt32(ctrl.Tag);
+
+            foreach (var actionName in AllActionNames)
+            {
+                var toolStripItem = cmnuAddToAction.DropDownItems.Add(actionName, Resources.action, (cmnuSender, cmnuEventArgs) =>
+                {
+                    var action = ((ToolStripItem)cmnuSender).Tag as string;
+                    var actionNode = actionsNode.Nodes.Find(action, true).First();
+                    var actionFrameNode = actionNode.Nodes.Add(boundingBoxIndex.ToString());
+                    actionFrameNode.Tag = spriteSheet.SpriteBoundingBoxes.First(x => x.Key == boundingBoxIndex);
+                    actionFrameNode.ImageKey = actionFrameNode.SelectedImageKey = $"Sprite_{boundingBoxIndex}";
+                });
+
+                toolStripItem.Tag = actionName;
+            }
+
+        }
+
+        private void cmsAction_Opening(object sender, CancelEventArgs e)
+        {
+            cmnuMoveUp.Enabled =
+                        cmnuMoveTop.Enabled =
+                        cmnuMoveDown.Enabled =
+                        cmnuMoveBottom.Enabled = true;
+
+            var node = tv.GetNodeAt(tv.PointToClient(cmsActionSprite.Bounds.Location));
+            if (node != null)
+            {
+
+                if (node == node.Parent.Nodes[0])
+                {
+                    cmnuMoveUp.Enabled = cmnuMoveTop.Enabled = false;
+                }
+                else if (node == node.Parent.Nodes[node.Parent.Nodes.Count - 1])
+                {
+                    cmnuMoveDown.Enabled = cmnuMoveBottom.Enabled = false;
+                }
+            }
         }
     }
 }

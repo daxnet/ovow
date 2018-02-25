@@ -40,6 +40,7 @@ namespace Ovow.Framework.Sprites
         private SpriteSheet(string fileName, Color backgroundColor = default(Color))
         {
             this.bitmap = (Bitmap)Image.FromFile(fileName);
+            this.FileName = fileName;
             this.Width = this.bitmap.Width;
             this.Height = this.bitmap.Height;
             this.backgroundColor = backgroundColor;
@@ -47,10 +48,16 @@ namespace Ovow.Framework.Sprites
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        [Description("Width of the sprite sheet.")]
         public int Width { get; }
 
+        [Description("Height of the sprite sheet.")]
         public int Height { get; }
 
+        [Description("Bitmap file name of the sprite sheet.")]
+        public string FileName { get; }
+
+        [Description("The background color used for identifying the edge and background pixels.")]
         public Color BackgroundColor
         {
             get { return this.backgroundColor; }
@@ -65,6 +72,7 @@ namespace Ovow.Framework.Sprites
             }
         }
 
+        [Browsable(false)]
         public int[,] MaskMatrix
         {
             get
@@ -87,6 +95,7 @@ namespace Ovow.Framework.Sprites
             }
         }
 
+        [Browsable(false)]
         public int[,] EdgeMatrix
         {
             get
@@ -109,6 +118,7 @@ namespace Ovow.Framework.Sprites
             }
         }
 
+        [Browsable(false)]
         public IEnumerable<KeyValuePair<int, List<Point>>> Islands
         {
             get
@@ -139,36 +149,46 @@ namespace Ovow.Framework.Sprites
             }
         }
 
+        [Description("The image of the sprite sheet.")]
         public Image Bitmap => bitmap;
 
-        public IEnumerable<KeyValuePair<int, Tuple<Point, Point>>> IslandBoundingBoxes
+        [Description("Total number of the sprites in the current sprite sheet.")]
+        public int TotalSprites => this.SpriteBoundingBoxes.Count();
+
+        [Description("Total number of the graphics islands in the current sprite sheet.")]
+        public int TotalIslands => this.IslandBoundingBoxes.Count();
+
+        [Browsable(false)]
+        public IEnumerable<KeyValuePair<int, Rectangle>> IslandBoundingBoxes
         {
             get
             {
                 foreach (var island in Islands)
                 {
-                    yield return new KeyValuePair<int, Tuple<Point, Point>>(island.Key, new Tuple<Point, Point>(
-                            new Point(island.Value.Select(_ => _.X).Min(), island.Value.Select(_ => _.Y).Min()),
-                            new Point(island.Value.Select(_ => _.X).Max(), island.Value.Select(_ => _.Y).Max())
-                        ));
+                    var x1 = island.Value.Select(_ => _.X).Min();
+                    var y1 = island.Value.Select(_ => _.Y).Min();
+                    var x2 = island.Value.Select(_ => _.X).Max();
+                    var y2 = island.Value.Select(_ => _.Y).Max();
+                    yield return new KeyValuePair<int, Rectangle>(island.Key, new Rectangle(x1, y1, x2 - x1, y2 - y1));
                 }
             }
         }
 
-        public IEnumerable<KeyValuePair<int, Tuple<Point, Point>>> SpriteBoundingBoxes
+        [Browsable(false)]
+        public IEnumerable<KeyValuePair<int, Rectangle>> SpriteBoundingBoxes
         {
             get
             {
-                var result = new Dictionary<int, Tuple<Point, Point>>();
+                var result = new Dictionary<int, Rectangle>();
                 var islandBoundingBoxes = IslandBoundingBoxes;
 
                 foreach (var boundingBox in islandBoundingBoxes)
                 {
                     if (islandBoundingBoxes.Any(bb =>
-                        bb.Value.Item1.X < boundingBox.Value.Item1.X &&
-                        bb.Value.Item1.Y < boundingBox.Value.Item1.Y &&
-                        bb.Value.Item2.X > boundingBox.Value.Item2.X &&
-                        bb.Value.Item2.Y > boundingBox.Value.Item2.Y))
+                        bb.Value.X < boundingBox.Value.X &&
+                        bb.Value.Y < boundingBox.Value.Y &&
+                        bb.Value.X + bb.Value.Width > boundingBox.Value.X + boundingBox.Value.Width &&
+                        bb.Value.Y + bb.Value.Height > boundingBox.Value.Y + boundingBox.Value.Height))
                     {
                         continue;
                     }
@@ -215,7 +235,7 @@ namespace Ovow.Framework.Sprites
             return hasBackgroundPixelAround && hasMaskPixelAround;
         }
 
-        private bool IsBackgroundPixel(int x, int y) => BackgroundColor == default(Color) || BackgroundColor == Color.Transparent ? bitmap.GetPixel(x, y).A == 0 : bitmap.GetPixel(x, y) == BackgroundColor;
+        private bool IsBackgroundPixel(int x, int y) => BackgroundColor == default(Color) || BackgroundColor == Color.Transparent ? bitmap.GetPixel(x, y).A == 0 : bitmap.GetPixel(x, y).RgbEquals(BackgroundColor);
 
         private void MarkIsland(int[,] edgeMatrix, int x, int y, int index, ref List<Point> coordinates)
         {
