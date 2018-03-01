@@ -32,21 +32,18 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuOpenSpriteSheet = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuClose = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton3 = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.tv = new System.Windows.Forms.TreeView();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.tbFPS = new System.Windows.Forms.TrackBar();
+            this.btnAnimate = new System.Windows.Forms.Button();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.pnlMain = new System.Windows.Forms.Panel();
-            this.pictureBox = new System.Windows.Forms.PictureBox();
             this.propertyGrid = new System.Windows.Forms.PropertyGrid();
             this.openSpriteSheetImageDialog = new System.Windows.Forms.OpenFileDialog();
             this.cmsActions = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -64,10 +61,13 @@
             this.cmnuDeleteAction = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsAction = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.cmnuActionAnimate = new System.Windows.Forms.ToolStripMenuItem();
-            this.imageListAnimation = new System.Windows.Forms.ImageList(this.components);
-            this.btnAnimate = new System.Windows.Forms.Button();
-            this.tbFPS = new System.Windows.Forms.TrackBar();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.pbAnimation = new System.Windows.Forms.PictureBox();
+            this.pictureBox = new System.Windows.Forms.PictureBox();
+            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton3 = new System.Windows.Forms.ToolStripButton();
+            this.mnuOpenSpriteSheet = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -78,18 +78,18 @@
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.tbFPS)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             this.pnlMain.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.cmsActions.SuspendLayout();
             this.cmsBoundingBox.SuspendLayout();
             this.cmsActionSprite.SuspendLayout();
             this.cmsAction.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.tbFPS)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbAnimation)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -110,15 +110,6 @@
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
-            // 
-            // mnuOpenSpriteSheet
-            // 
-            this.mnuOpenSpriteSheet.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.folder_image;
-            this.mnuOpenSpriteSheet.Name = "mnuOpenSpriteSheet";
-            this.mnuOpenSpriteSheet.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.mnuOpenSpriteSheet.Size = new System.Drawing.Size(191, 22);
-            this.mnuOpenSpriteSheet.Text = "Open Image...";
-            this.mnuOpenSpriteSheet.Click += new System.EventHandler(this.Action_OpenSpriteSheetImage);
             // 
             // mnuClose
             // 
@@ -148,38 +139,10 @@
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripButton1
-            // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton1.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.folder_image;
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton1.Text = "toolStripButton1";
-            this.toolStripButton1.Click += new System.EventHandler(this.Action_OpenSpriteSheetImage);
-            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripButton2
-            // 
-            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
-            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton2.Text = "toolStripButton2";
-            // 
-            // toolStripButton3
-            // 
-            this.toolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton3.Image")));
-            this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton3.Name = "toolStripButton3";
-            this.toolStripButton3.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton3.Text = "toolStripButton3";
             // 
             // splitContainer1
             // 
@@ -213,11 +176,11 @@
             // 
             // splitContainer3.Panel2
             // 
-            this.splitContainer3.Panel2.Controls.Add(this.pictureBox1);
+            this.splitContainer3.Panel2.Controls.Add(this.pbAnimation);
             this.splitContainer3.Panel2.Controls.Add(this.tbFPS);
             this.splitContainer3.Panel2.Controls.Add(this.btnAnimate);
             this.splitContainer3.Size = new System.Drawing.Size(216, 512);
-            this.splitContainer3.SplitterDistance = 262;
+            this.splitContainer3.SplitterDistance = 269;
             this.splitContainer3.TabIndex = 0;
             // 
             // tv
@@ -229,7 +192,7 @@
             this.tv.Location = new System.Drawing.Point(0, 0);
             this.tv.Name = "tv";
             this.tv.SelectedImageIndex = 0;
-            this.tv.Size = new System.Drawing.Size(216, 262);
+            this.tv.Size = new System.Drawing.Size(216, 269);
             this.tv.TabIndex = 0;
             this.tv.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tv_AfterSelect);
             this.tv.DragEnter += new System.Windows.Forms.DragEventHandler(this.tv_DragEnter);
@@ -240,6 +203,27 @@
             this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
             this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            // 
+            // tbFPS
+            // 
+            this.tbFPS.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbFPS.Location = new System.Drawing.Point(42, 13);
+            this.tbFPS.Maximum = 60;
+            this.tbFPS.Minimum = 1;
+            this.tbFPS.Name = "tbFPS";
+            this.tbFPS.Size = new System.Drawing.Size(162, 45);
+            this.tbFPS.TabIndex = 1;
+            this.tbFPS.Value = 10;
+            // 
+            // btnAnimate
+            // 
+            this.btnAnimate.Location = new System.Drawing.Point(12, 13);
+            this.btnAnimate.Name = "btnAnimate";
+            this.btnAnimate.Size = new System.Drawing.Size(24, 24);
+            this.btnAnimate.TabIndex = 0;
+            this.btnAnimate.UseVisualStyleBackColor = true;
+            this.btnAnimate.Click += new System.EventHandler(this.btnAnimate_Click);
             // 
             // splitContainer2
             // 
@@ -271,16 +255,6 @@
             this.pnlMain.TabIndex = 0;
             this.pnlMain.Scroll += new System.Windows.Forms.ScrollEventHandler(this.pnlMain_Scroll);
             this.pnlMain.Click += new System.EventHandler(this.pnlMain_Click);
-            // 
-            // pictureBox
-            // 
-            this.pictureBox.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox.Name = "pictureBox";
-            this.pictureBox.Size = new System.Drawing.Size(100, 50);
-            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBox.TabIndex = 0;
-            this.pictureBox.TabStop = false;
-            this.pictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseClick);
             // 
             // propertyGrid
             // 
@@ -402,42 +376,72 @@
             this.cmnuActionAnimate.Name = "cmnuActionAnimate";
             this.cmnuActionAnimate.Size = new System.Drawing.Size(119, 22);
             this.cmnuActionAnimate.Text = "Animate";
+            this.cmnuActionAnimate.Click += new System.EventHandler(this.Action_Animate);
             // 
-            // imageListAnimation
+            // backgroundWorker1
             // 
-            this.imageListAnimation.ColorDepth = System.Windows.Forms.ColorDepth.Depth8Bit;
-            this.imageListAnimation.ImageSize = new System.Drawing.Size(16, 16);
-            this.imageListAnimation.TransparentColor = System.Drawing.Color.Transparent;
+            this.backgroundWorker1.WorkerSupportsCancellation = true;
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             // 
-            // btnAnimate
+            // pbAnimation
             // 
-            this.btnAnimate.Location = new System.Drawing.Point(12, 13);
-            this.btnAnimate.Name = "btnAnimate";
-            this.btnAnimate.Size = new System.Drawing.Size(24, 24);
-            this.btnAnimate.TabIndex = 0;
-            this.btnAnimate.UseVisualStyleBackColor = true;
-            // 
-            // tbFPS
-            // 
-            this.tbFPS.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.pbAnimation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbFPS.Location = new System.Drawing.Point(42, 13);
-            this.tbFPS.Maximum = 60;
-            this.tbFPS.Minimum = 1;
-            this.tbFPS.Name = "tbFPS";
-            this.tbFPS.Size = new System.Drawing.Size(162, 45);
-            this.tbFPS.TabIndex = 1;
-            this.tbFPS.Value = 10;
+            this.pbAnimation.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pbAnimation.Location = new System.Drawing.Point(12, 64);
+            this.pbAnimation.Name = "pbAnimation";
+            this.pbAnimation.Size = new System.Drawing.Size(192, 157);
+            this.pbAnimation.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.pbAnimation.TabIndex = 2;
+            this.pbAnimation.TabStop = false;
             // 
-            // pictureBox1
+            // pictureBox
             // 
-            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 64);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(192, 164);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.pictureBox1.TabIndex = 2;
-            this.pictureBox1.TabStop = false;
+            this.pictureBox.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox.Name = "pictureBox";
+            this.pictureBox.Size = new System.Drawing.Size(100, 50);
+            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox.TabIndex = 0;
+            this.pictureBox.TabStop = false;
+            this.pictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseClick);
+            // 
+            // toolStripButton1
+            // 
+            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton1.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.folder_image;
+            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton1.Text = "toolStripButton1";
+            this.toolStripButton1.Click += new System.EventHandler(this.Action_OpenSpriteSheetImage);
+            // 
+            // toolStripButton2
+            // 
+            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
+            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton2.Name = "toolStripButton2";
+            this.toolStripButton2.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton2.Text = "toolStripButton2";
+            // 
+            // toolStripButton3
+            // 
+            this.toolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton3.Image")));
+            this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton3.Name = "toolStripButton3";
+            this.toolStripButton3.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton3.Text = "toolStripButton3";
+            // 
+            // mnuOpenSpriteSheet
+            // 
+            this.mnuOpenSpriteSheet.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.folder_image;
+            this.mnuOpenSpriteSheet.Name = "mnuOpenSpriteSheet";
+            this.mnuOpenSpriteSheet.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.mnuOpenSpriteSheet.Size = new System.Drawing.Size(191, 22);
+            this.mnuOpenSpriteSheet.Text = "Open Image...";
+            this.mnuOpenSpriteSheet.Click += new System.EventHandler(this.Action_OpenSpriteSheetImage);
             // 
             // FrmMain
             // 
@@ -466,19 +470,19 @@
             this.splitContainer3.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
             this.splitContainer3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.tbFPS)).EndInit();
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             this.pnlMain.ResumeLayout(false);
             this.pnlMain.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.cmsActions.ResumeLayout(false);
             this.cmsBoundingBox.ResumeLayout(false);
             this.cmsActionSprite.ResumeLayout(false);
             this.cmsAction.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.tbFPS)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbAnimation)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -520,10 +524,10 @@
         private System.Windows.Forms.ToolStripMenuItem cmnuDeleteAction;
         private System.Windows.Forms.ContextMenuStrip cmsAction;
         private System.Windows.Forms.ToolStripMenuItem cmnuActionAnimate;
-        private System.Windows.Forms.ImageList imageListAnimation;
         private System.Windows.Forms.Button btnAnimate;
         private System.Windows.Forms.TrackBar tbFPS;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pbAnimation;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
     }
 }
 

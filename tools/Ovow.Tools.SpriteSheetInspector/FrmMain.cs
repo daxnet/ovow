@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -24,6 +25,12 @@ namespace Ovow.Tools.SpriteSheetInspector
         private TreeNode rootNode;
         private TreeNode spritesNode;
         private TreeNode actionsNode;
+        private volatile bool signalThreadStop;
+        private List<Image> animationImages = new List<Image>();
+
+        private delegate void SetAnimationPictureDelegate(Image picture);
+        private delegate int GetFPSValueDelegate();
+        private delegate void SetControlButtonStatusDelegate(bool playing);
 
         public FrmMain()
         {
@@ -32,6 +39,10 @@ namespace Ovow.Tools.SpriteSheetInspector
             typeof(Control)
                 .GetProperty("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance)
                 .SetValue(this.pictureBox, true);
+
+            this.SetControlButtonStatus(false);
+            this.btnAnimate.Enabled = false;
+            this.tbFPS.Enabled = false;
         }
 
         private void LoadSpriteSheet(string fileName)
@@ -125,6 +136,20 @@ namespace Ovow.Tools.SpriteSheetInspector
                 this.propertyGrid.SelectedObject = null;
                 this.ClearSpriteBoundingBoxes();
                 this.tv.Nodes.Clear();
+
+                this.backgroundWorker1.CancelAsync();
+
+                this.pbAnimation.Image = null;
+
+                foreach (var image in this.animationImages)
+                {
+                    image?.Dispose();
+                }
+
+                this.animationImages.Clear();
+
+                this.btnAnimate.Enabled = false;
+                this.tbFPS.Enabled = false;
             }
         }
 
@@ -216,6 +241,81 @@ namespace Ovow.Tools.SpriteSheetInspector
             }
         }
 
+        private void SetAnimationPicture(Image picture)
+        {
+            if (pbAnimation.InvokeRequired)
+            {
+                SetAnimationPictureDelegate d = new SetAnimationPictureDelegate(SetAnimationPicture);
+                this.Invoke(d, picture);
+            }
+            else
+            {
+                try
+                {
+                    pbAnimation.Image = picture;
+                }
+                catch
+                {
+                    pbAnimation.Image = null;
+                }
+            }
+        }
+
+        private int GetFPSValue()
+        {
+            if (tbFPS.InvokeRequired)
+            {
+                GetFPSValueDelegate d = new GetFPSValueDelegate(GetFPSValue);
+                return Convert.ToInt32(this.Invoke(d));
+            }
+            else
+            {
+                return tbFPS.Value;
+            }
+        }
+
+        private void StartAnimation()
+        {
+            animationImages.Clear();
+            foreach (TreeNode actionSpriteNode in tv.SelectedNode.Nodes)
+            {
+                var boundingBox = (KeyValuePair<int, Rectangle>)actionSpriteNode.Tag;
+                var spritePicture = new Bitmap(boundingBox.Value.Width, boundingBox.Value.Height);
+                using (var graphics = Graphics.FromImage(spritePicture))
+                {
+                    graphics.DrawImage(this.spriteSheet.Bitmap,
+                        new Rectangle(0, 0, boundingBox.Value.Width, boundingBox.Value.Height),
+                        boundingBox.Value,
+                        GraphicsUnit.Pixel);
+                }
+
+                animationImages.Add(spritePicture);
+            }
+
+            this.SetControlButtonStatus(true);
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void SetControlButtonStatus(bool playing)
+        {
+            if (btnAnimate.InvokeRequired)
+            {
+                SetControlButtonStatusDelegate d = new SetControlButtonStatusDelegate(SetControlButtonStatus);
+                this.Invoke(d, playing);
+            }
+            else
+            {
+                if (playing)
+                {
+                    btnAnimate.Image = Resources.pause;
+                }
+                else
+                {
+                    btnAnimate.Image = Resources.play;
+                }
+            }
+        }
+
         private IEnumerable<string> AllActionNames
         {
             get
@@ -288,7 +388,7 @@ namespace Ovow.Tools.SpriteSheetInspector
 
         private void Action_Animate(object sender, EventArgs e)
         {
-
+            this.StartAnimation();
         }
 
         private void FrmMain_FormClosed(object sender, FormClosedEventArgs e)
@@ -309,6 +409,17 @@ namespace Ovow.Tools.SpriteSheetInspector
                 {
                     this.SelectSpriteOnSheet(-1);
                 }
+
+                if (node.Parent == actionsNode)
+                {
+                    btnAnimate.Enabled = true;
+                    tbFPS.Enabled = true;
+                }
+                else
+                {
+                    btnAnimate.Enabled = false;
+                    tbFPS.Enabled = false;
+                }
             }
         }
 
@@ -321,7 +432,12 @@ namespace Ovow.Tools.SpriteSheetInspector
         private void pnlMain_Click(object sender, EventArgs e)
         {
             this.SelectSpriteOnSheet(-1);
-            tv.SelectedNode = tv.Nodes[0].Nodes[0];
+
+            if (tv.Nodes.Count > 0 &&
+                tv.Nodes[0].Nodes.Count > 0)
+            {
+                tv.SelectedNode = tv.Nodes[0].Nodes[0];
+            }
         }
 
         private void tv_MouseClick(object sender, MouseEventArgs e)
@@ -407,6 +523,48 @@ namespace Ovow.Tools.SpriteSheetInspector
                 {
                     cmnuMoveDown.Enabled = cmnuMoveBottom.Enabled = false;
                 }
+            }
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var index = 0;
+            var total = animationImages.Count;
+            while (true)
+            {
+                if (backgroundWorker1.CancellationPending)
+                {
+                    e.Cancel = true;
+                    break;
+                }
+
+                if (total > 0)
+                {
+                    SetAnimationPicture(animationImages[index]);
+                }
+
+                index++;
+                if (index >= total)
+                {
+                    index = 0;
+                }
+
+                var sleep = 1000.0F / GetFPSValue();
+                Thread.Sleep(Convert.ToInt32(sleep));
+            }
+
+            SetControlButtonStatus(false);
+        }
+
+        private void btnAnimate_Click(object sender, EventArgs e)
+        {
+            if (backgroundWorker1.IsBusy)
+            {
+                backgroundWorker1.CancelAsync();
+            }
+            else
+            {
+                StartAnimation();
             }
         }
     }

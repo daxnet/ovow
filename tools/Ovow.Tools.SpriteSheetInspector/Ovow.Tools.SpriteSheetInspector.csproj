@@ -57,6 +57,9 @@
     <Compile Include="FrmTextInput.Designer.cs">
       <DependentUpon>FrmTextInput.cs</DependentUpon>
     </Compile>
+    <Compile Include="Models\SsiAction.cs" />
+    <Compile Include="Models\SsiProject.cs" />
+    <Compile Include="Models\SsiWorkspace.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserControls\BorderedPictureBox.cs">
@@ -105,9 +108,7 @@
   <ItemGroup>
     <None Include="Resources\folder_image.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="Resources\table.png" />
   </ItemGroup>
@@ -119,6 +120,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\bullet_go.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_pause_blue.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control_play_blue.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
