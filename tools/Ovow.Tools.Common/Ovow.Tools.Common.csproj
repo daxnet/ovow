@@ -45,7 +45,10 @@
     <Compile Include="LengthyOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Workspaces\Workspace.cs" />
+    <Compile Include="Workspaces\WorkspaceCreatedEventArgs.cs" />
     <Compile Include="Workspaces\WorkspaceEventArgs.cs" />
+    <Compile Include="Workspaces\WorkspaceOpenedEventArgs.cs" />
+    <Compile Include="Workspaces\WorkspaceSavedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controls\" />

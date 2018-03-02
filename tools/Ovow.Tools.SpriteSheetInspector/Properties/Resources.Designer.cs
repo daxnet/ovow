@@ -83,9 +83,29 @@ namespace Ovow.Tools.SpriteSheetInspector.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap folder_image {
+        internal static System.Drawing.Bitmap close_project {
             get {
-                object obj = ResourceManager.GetObject("folder_image", resourceCulture);
+                object obj = ResourceManager.GetObject("close_project", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap new_proj {
+            get {
+                object obj = ResourceManager.GetObject("new_proj", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap open_proj {
+            get {
+                object obj = ResourceManager.GetObject("open_proj", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -116,6 +136,16 @@ namespace Ovow.Tools.SpriteSheetInspector.Properties {
         internal static System.Drawing.Bitmap root {
             get {
                 object obj = ResourceManager.GetObject("root", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap save_proj {
+            get {
+                object obj = ResourceManager.GetObject("save_proj", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

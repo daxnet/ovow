@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace Ovow.Tools.Common.Workspaces
 {
-    public class WorkspaceEventArgs : EventArgs
+    public sealed class WorkspaceOpenedEventArgs : WorkspaceEventArgs
     {
-        public WorkspaceEventArgs(string fileName)
+        public WorkspaceOpenedEventArgs(string fileName)
+            : base(fileName)
         {
-            this.FileName = fileName;
         }
-
-        public string FileName { get; }
     }
 }

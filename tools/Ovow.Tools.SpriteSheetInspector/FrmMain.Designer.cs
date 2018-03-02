@@ -29,10 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuClose = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuCloseProject = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -64,10 +63,13 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.pbAnimation = new System.Windows.Forms.PictureBox();
             this.pictureBox = new System.Windows.Forms.PictureBox();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton3 = new System.Windows.Forms.ToolStripButton();
-            this.mnuOpenSpriteSheet = new System.Windows.Forms.ToolStripMenuItem();
+            this.tbtnNewProject = new System.Windows.Forms.ToolStripButton();
+            this.tbtnOpenProject = new System.Windows.Forms.ToolStripButton();
+            this.tbtnSaveProject = new System.Windows.Forms.ToolStripButton();
+            this.mnuNewProject = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpenProject = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuSaveProject = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -105,18 +107,22 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuOpenSpriteSheet,
-            this.mnuClose});
+            this.mnuNewProject,
+            this.mnuOpenProject,
+            this.mnuSaveProject,
+            this.toolStripMenuItem3,
+            this.mnuCloseProject});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
             // 
-            // mnuClose
+            // mnuCloseProject
             // 
-            this.mnuClose.Name = "mnuClose";
-            this.mnuClose.Size = new System.Drawing.Size(191, 22);
-            this.mnuClose.Text = "Close";
-            this.mnuClose.Click += new System.EventHandler(this.Action_Close);
+            this.mnuCloseProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.close_project;
+            this.mnuCloseProject.Name = "mnuCloseProject";
+            this.mnuCloseProject.Size = new System.Drawing.Size(155, 22);
+            this.mnuCloseProject.Text = "Close";
+            this.mnuCloseProject.Click += new System.EventHandler(this.Action_CloseProject);
             // 
             // statusStrip1
             // 
@@ -129,10 +135,10 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton1,
-            this.toolStripSeparator1,
-            this.toolStripButton2,
-            this.toolStripButton3});
+            this.tbtnNewProject,
+            this.tbtnOpenProject,
+            this.tbtnSaveProject,
+            this.toolStripSeparator1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(763, 25);
@@ -406,42 +412,67 @@
             this.pictureBox.TabStop = false;
             this.pictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseClick);
             // 
-            // toolStripButton1
+            // tbtnNewProject
             // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton1.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.folder_image;
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton1.Text = "toolStripButton1";
-            this.toolStripButton1.Click += new System.EventHandler(this.Action_OpenSpriteSheetImage);
+            this.tbtnNewProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnNewProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.new_proj;
+            this.tbtnNewProject.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnNewProject.Name = "tbtnNewProject";
+            this.tbtnNewProject.Size = new System.Drawing.Size(23, 22);
+            this.tbtnNewProject.Text = "toolStripButton2";
+            this.tbtnNewProject.Click += new System.EventHandler(this.Action_NewProject);
             // 
-            // toolStripButton2
+            // tbtnOpenProject
             // 
-            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
-            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton2.Text = "toolStripButton2";
+            this.tbtnOpenProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnOpenProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.open_proj;
+            this.tbtnOpenProject.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnOpenProject.Name = "tbtnOpenProject";
+            this.tbtnOpenProject.Size = new System.Drawing.Size(23, 22);
+            this.tbtnOpenProject.Text = "Open Project";
+            this.tbtnOpenProject.Click += new System.EventHandler(this.Action_OpenProject);
             // 
-            // toolStripButton3
+            // tbtnSaveProject
             // 
-            this.toolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton3.Image")));
-            this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton3.Name = "toolStripButton3";
-            this.toolStripButton3.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton3.Text = "toolStripButton3";
+            this.tbtnSaveProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnSaveProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.save_proj;
+            this.tbtnSaveProject.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnSaveProject.Name = "tbtnSaveProject";
+            this.tbtnSaveProject.Size = new System.Drawing.Size(23, 22);
+            this.tbtnSaveProject.Text = "Save Project";
+            this.tbtnSaveProject.Click += new System.EventHandler(this.Action_SaveProject);
             // 
-            // mnuOpenSpriteSheet
+            // mnuNewProject
             // 
-            this.mnuOpenSpriteSheet.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.folder_image;
-            this.mnuOpenSpriteSheet.Name = "mnuOpenSpriteSheet";
-            this.mnuOpenSpriteSheet.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.mnuOpenSpriteSheet.Size = new System.Drawing.Size(191, 22);
-            this.mnuOpenSpriteSheet.Text = "Open Image...";
-            this.mnuOpenSpriteSheet.Click += new System.EventHandler(this.Action_OpenSpriteSheetImage);
+            this.mnuNewProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.new_proj;
+            this.mnuNewProject.Name = "mnuNewProject";
+            this.mnuNewProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.mnuNewProject.Size = new System.Drawing.Size(155, 22);
+            this.mnuNewProject.Text = "New...";
+            this.mnuNewProject.Click += new System.EventHandler(this.Action_NewProject);
+            // 
+            // mnuOpenProject
+            // 
+            this.mnuOpenProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.open_proj;
+            this.mnuOpenProject.Name = "mnuOpenProject";
+            this.mnuOpenProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.mnuOpenProject.Size = new System.Drawing.Size(155, 22);
+            this.mnuOpenProject.Text = "Open...";
+            this.mnuOpenProject.Click += new System.EventHandler(this.Action_OpenProject);
+            // 
+            // mnuSaveProject
+            // 
+            this.mnuSaveProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.save_proj;
+            this.mnuSaveProject.Name = "mnuSaveProject";
+            this.mnuSaveProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.mnuSaveProject.Size = new System.Drawing.Size(155, 22);
+            this.mnuSaveProject.Text = "Save";
+            this.mnuSaveProject.Click += new System.EventHandler(this.Action_SaveProject);
+            // 
+            // toolStripMenuItem3
+            // 
+            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 6);
             // 
             // FrmMain
             // 
@@ -456,7 +487,7 @@
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Ovow Sprite Sheet Inspector";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FrmMain_FormClosed);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmMain_FormClosing);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -495,19 +526,19 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mnuOpenSpriteSheet;
-        private System.Windows.Forms.ToolStripButton toolStripButton1;
+        private System.Windows.Forms.ToolStripMenuItem mnuOpenProject;
+        private System.Windows.Forms.ToolStripButton tbtnOpenProject;
         private System.Windows.Forms.OpenFileDialog openSpriteSheetImageDialog;
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.Panel pnlMain;
         private System.Windows.Forms.PictureBox pictureBox;
         private System.Windows.Forms.PropertyGrid propertyGrid;
-        private System.Windows.Forms.ToolStripMenuItem mnuClose;
+        private System.Windows.Forms.ToolStripMenuItem mnuCloseProject;
         private System.Windows.Forms.SplitContainer splitContainer3;
         private System.Windows.Forms.TreeView tv;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton toolStripButton2;
-        private System.Windows.Forms.ToolStripButton toolStripButton3;
+        private System.Windows.Forms.ToolStripButton tbtnNewProject;
+        private System.Windows.Forms.ToolStripButton tbtnSaveProject;
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.ContextMenuStrip cmsActions;
         private System.Windows.Forms.ToolStripMenuItem cmnuNewAction;
@@ -528,6 +559,9 @@
         private System.Windows.Forms.TrackBar tbFPS;
         private System.Windows.Forms.PictureBox pbAnimation;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.ToolStripMenuItem mnuNewProject;
+        private System.Windows.Forms.ToolStripMenuItem mnuSaveProject;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
     }
 }
 

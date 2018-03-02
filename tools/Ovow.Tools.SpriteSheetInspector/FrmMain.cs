@@ -1,6 +1,8 @@
 ﻿using Ovow.Framework;
 using Ovow.Framework.Sprites;
 using Ovow.Tools.Common;
+using Ovow.Tools.Common.Workspaces;
+using Ovow.Tools.SpriteSheetInspector.Models;
 using Ovow.Tools.SpriteSheetInspector.Properties;
 using Ovow.Tools.SpriteSheetInspector.UserControls;
 using System;
@@ -20,12 +22,11 @@ namespace Ovow.Tools.SpriteSheetInspector
 {
     public partial class FrmMain : Form
     {
-        private SpriteSheet spriteSheet;
+        private readonly SsiWorkspace workspace = new SsiWorkspace();
         private List<BorderedPictureBox> spritePictureBoxes = new List<BorderedPictureBox>();
         private TreeNode rootNode;
         private TreeNode spritesNode;
         private TreeNode actionsNode;
-        private volatile bool signalThreadStop;
         private List<Image> animationImages = new List<Image>();
 
         private delegate void SetAnimationPictureDelegate(Image picture);
@@ -35,6 +36,18 @@ namespace Ovow.Tools.SpriteSheetInspector
         public FrmMain()
         {
             InitializeComponent();
+
+            workspace.WorkspaceCreated += Workspace_WorkspaceCreated;
+            workspace.WorkspaceChanged += Workspace_WorkspaceChanged;
+            workspace.WorkspaceOpened += Workspace_WorkspaceOpened;
+            workspace.WorkspaceSaved += Workspace_WorkspaceSaved;
+            workspace.WorkspaceClosed += Workspace_WorkspaceClosed;
+
+            workspace.SpriteSheetBackgroundColorChanged += (ssbccSender, ssbccEventArgs) =>
+              {
+                  RecreateSpriteBoundingBoxes();
+              };
+
             this.pnlMain.MouseWheel += (s, e) => InvalidatePanel();
             typeof(Control)
                 .GetProperty("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance)
@@ -43,18 +56,63 @@ namespace Ovow.Tools.SpriteSheetInspector
             this.SetControlButtonStatus(false);
             this.btnAnimate.Enabled = false;
             this.tbFPS.Enabled = false;
+
+            mnuSaveProject.Enabled = false;
+            tbtnSaveProject.Enabled = false;
+            this.mnuCloseProject.Enabled = false;
         }
 
-        private void LoadSpriteSheet(string fileName)
+        private void Workspace_WorkspaceClosed(object sender, EventArgs e)
         {
-            UnloadSpriteSheet();
-            this.spriteSheet = SpriteSheet.CreateFromFile(fileName);
-            this.spriteSheet.PropertyChanged += SpriteSheet_PropertyChanged;
-            this.pictureBox.Image = this.spriteSheet.Bitmap;
+            this.pictureBox.Image = null;
+            this.propertyGrid.SelectedObject = null;
+            this.ClearSpriteBoundingBoxes();
+            this.tv.Nodes.Clear();
 
+            this.backgroundWorker1.CancelAsync();
+
+            this.pbAnimation.Image = null;
+
+            foreach (var image in this.animationImages)
+            {
+                image?.Dispose();
+            }
+
+            this.animationImages.Clear();
+
+            this.btnAnimate.Enabled = false;
+            this.tbFPS.Enabled = false;
+            this.mnuCloseProject.Enabled = false;
+            this.mnuSaveProject.Enabled = false;
+            this.tbtnSaveProject.Enabled = false;
+        }
+
+        private void Workspace_WorkspaceCreated(object sender, WorkspaceCreatedEventArgs<SsiProject> e)
+        {
+            this.pictureBox.Image = workspace.SpriteSheet.Bitmap;
             this.RecreateSpriteBoundingBoxes();
+            this.propertyGrid.SelectedObject = workspace.SpriteSheet;
+            this.mnuCloseProject.Enabled = true;
+        }
 
-            this.propertyGrid.SelectedObject = this.spriteSheet;
+        private void Workspace_WorkspaceSaved(object sender, WorkspaceSavedEventArgs e)
+        {
+            mnuSaveProject.Enabled = false;
+            tbtnSaveProject.Enabled = false;
+        }
+
+        private void Workspace_WorkspaceOpened(object sender, WorkspaceOpenedEventArgs e)
+        {
+            this.pictureBox.Image = workspace.SpriteSheet.Bitmap;
+            this.RecreateSpriteBoundingBoxes();
+            this.propertyGrid.SelectedObject = workspace.SpriteSheet;
+            this.mnuCloseProject.Enabled = true;
+        }
+
+        private void Workspace_WorkspaceChanged(object sender, EventArgs e)
+        {
+            mnuSaveProject.Enabled = true;
+            tbtnSaveProject.Enabled = true;
         }
 
         private void ClearSpriteBoundingBoxes()
@@ -86,14 +144,14 @@ namespace Ovow.Tools.SpriteSheetInspector
                 this.imageList1.Images.Add("action", Resources.action);
 
                 this.tv.Nodes.Clear();
-                this.rootNode = this.tv.Nodes.Add(Path.GetFileName(this.spriteSheet.FileName));
+                this.rootNode = this.tv.Nodes.Add(Path.GetFileName(this.workspace.SpriteSheet.FileName));
                 this.rootNode.ImageKey = this.rootNode.SelectedImageKey = this.rootNode.StateImageKey = "root";
                 this.spritesNode = this.rootNode.Nodes.Add("Sprites");
                 this.spritesNode.ImageKey = this.spritesNode.SelectedImageKey = this.spritesNode.StateImageKey = "sprites";
                 this.actionsNode = this.rootNode.Nodes.Add("Actions");
                 this.actionsNode.ImageKey = this.actionsNode.SelectedImageKey = this.actionsNode.StateImageKey = "actions";
 
-                foreach (var bb in this.spriteSheet.SpriteBoundingBoxes)
+                foreach (var bb in this.workspace.SpriteSheet.SpriteBoundingBoxes)
                 {
                     var x = bb.Value.X;
                     var y = bb.Value.Y;
@@ -103,7 +161,7 @@ namespace Ovow.Tools.SpriteSheetInspector
                     var img = new Bitmap(width, height);
                     using (var graphics = Graphics.FromImage(img))
                     {
-                        graphics.DrawImage(this.spriteSheet.Bitmap, new Rectangle(0, 0, width, height), bb.Value, GraphicsUnit.Pixel);
+                        graphics.DrawImage(this.workspace.SpriteSheet.Bitmap, new Rectangle(0, 0, width, height), bb.Value, GraphicsUnit.Pixel);
                     }
 
                     imageList1.Images.Add($"Sprite_{bb.Key}", img);
@@ -121,56 +179,16 @@ namespace Ovow.Tools.SpriteSheetInspector
             }
         }
 
-        private void UnloadSpriteSheet()
-        {
-            using (new LengthyOperation(this))
-            {
-                this.pictureBox.Image = null;
-                if (this.spriteSheet != null)
-                {
-                    this.spriteSheet.PropertyChanged -= SpriteSheet_PropertyChanged;
-                    this.spriteSheet.Dispose();
-                    this.spriteSheet = null;
-                }
-
-                this.propertyGrid.SelectedObject = null;
-                this.ClearSpriteBoundingBoxes();
-                this.tv.Nodes.Clear();
-
-                this.backgroundWorker1.CancelAsync();
-
-                this.pbAnimation.Image = null;
-
-                foreach (var image in this.animationImages)
-                {
-                    image?.Dispose();
-                }
-
-                this.animationImages.Clear();
-
-                this.btnAnimate.Enabled = false;
-                this.tbFPS.Enabled = false;
-            }
-        }
-
-        private void SpriteSheet_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName.Equals("BackgroundColor"))
-            {
-                this.RecreateSpriteBoundingBoxes();
-            }
-        }
-
         private PictureBox CreateBoundingBox(int index, int width, int height)
         {
             var borderColor = Color.Black;
-            if (this.spriteSheet.BackgroundColor == Color.Transparent || this.spriteSheet.BackgroundColor == default(Color))
+            if (this.workspace.SpriteSheet.BackgroundColor == Color.Transparent || this.workspace.SpriteSheet.BackgroundColor == default(Color))
             {
                 borderColor = SystemColors.Control.Inverse();
             }
             else
             {
-                borderColor = this.spriteSheet.BackgroundColor.Inverse();
+                borderColor = this.workspace.SpriteSheet.BackgroundColor.Inverse();
             }
 
             var pb = new BorderedPictureBox { BorderColor = borderColor };
@@ -283,7 +301,7 @@ namespace Ovow.Tools.SpriteSheetInspector
                 var spritePicture = new Bitmap(boundingBox.Value.Width, boundingBox.Value.Height);
                 using (var graphics = Graphics.FromImage(spritePicture))
                 {
-                    graphics.DrawImage(this.spriteSheet.Bitmap,
+                    graphics.DrawImage(this.workspace.SpriteSheet.Bitmap,
                         new Rectangle(0, 0, boundingBox.Value.Width, boundingBox.Value.Height),
                         boundingBox.Value,
                         GraphicsUnit.Pixel);
@@ -327,18 +345,43 @@ namespace Ovow.Tools.SpriteSheetInspector
             }
         }
 
-        private void Action_OpenSpriteSheetImage(object sender, EventArgs e)
+        #region Action Methods
+
+        private void Action_NewProject(object sender, EventArgs e)
         {
-            if (openSpriteSheetImageDialog.ShowDialog() == DialogResult.OK)
+            using (new LengthyOperation(this))
             {
-                LoadSpriteSheet(openSpriteSheetImageDialog.FileName);
+                if (this.workspace.Close())
+                {
+                    this.workspace.New();
+                }
             }
         }
 
-        private void Action_Close(object sender, EventArgs e)
+        private void Action_OpenProject(object sender, EventArgs e)
         {
-            this.UnloadSpriteSheet();
+            using (new LengthyOperation(this))
+            {
+                this.workspace.Open();
+            }
         }
+
+        private void Action_SaveProject(object sender, EventArgs e)
+        {
+            using (new LengthyOperation(this))
+            {
+                this.workspace.Save();
+            }
+        }
+
+        private void Action_CloseProject(object sender, EventArgs e)
+        {
+            using (new LengthyOperation(this))
+            {
+                this.workspace.Close();
+            }
+        }
+        #endregion
 
         private void Action_NewAction(object sender, EventArgs e)
         {
@@ -389,11 +432,6 @@ namespace Ovow.Tools.SpriteSheetInspector
         private void Action_Animate(object sender, EventArgs e)
         {
             this.StartAnimation();
-        }
-
-        private void FrmMain_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            UnloadSpriteSheet();
         }
 
         private void tv_AfterSelect(object sender, TreeViewEventArgs e)
@@ -495,7 +533,7 @@ namespace Ovow.Tools.SpriteSheetInspector
                     var action = ((ToolStripItem)cmnuSender).Tag as string;
                     var actionNode = actionsNode.Nodes.Find(action, true).First();
                     var actionFrameNode = actionNode.Nodes.Add(boundingBoxIndex.ToString());
-                    actionFrameNode.Tag = spriteSheet.SpriteBoundingBoxes.First(x => x.Key == boundingBoxIndex);
+                    actionFrameNode.Tag = workspace.SpriteSheet.SpriteBoundingBoxes.First(x => x.Key == boundingBoxIndex);
                     actionFrameNode.ImageKey = actionFrameNode.SelectedImageKey = $"Sprite_{boundingBoxIndex}";
                 });
 
@@ -566,6 +604,11 @@ namespace Ovow.Tools.SpriteSheetInspector
             {
                 StartAnimation();
             }
+        }
+
+        private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = !this.workspace.Close();
         }
     }
 }
