@@ -1,13 +1,30 @@
-﻿using Newtonsoft.Json;
+﻿// ----------------------------------------------------------------------------
+//   ____                    ____                                   __
+//  / __ \_  _____ _    __  / __/______ ___ _  ___ _    _____  ____/ /__
+// / /_/ / |/ / _ \ |/|/ / / _// __/ _ `/  ' \/ -_) |/|/ / _ \/ __/  '_/
+// \____/|___/\___/__,__/ /_/ /_/  \_,_/_/_/_/\__/|__,__/\___/_/ /_/\_\
+//
+// A 2D gaming framework on MonoGame
+//
+// Copyright (C) 2018 by daxnet.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//    http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------
+
+using Newtonsoft.Json;
 using Ovow.Framework.Sprites;
 using Ovow.Tools.Common.Workspaces;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Ovow.Tools.SpriteSheetInspector.Models
@@ -22,17 +39,18 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
 
         protected override SsiProject Create()
         {
-            using (var openFileDialog = new OpenFileDialog {
-                    Filter = "Sprite Sheet Image Files (*.png)|*.png",
-                    DefaultExt = "png",
-                    AddExtension = true,
-                    Title = "Open Sprite Sheet Image"
-                })
+            using (var openFileDialog = new OpenFileDialog
+            {
+                Filter = "Sprite Sheet Image Files (*.png)|*.png",
+                DefaultExt = "png",
+                AddExtension = true,
+                Title = "Open Sprite Sheet Image"
+            })
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    this.LoadSpriteSheetFromFile(openFileDialog.FileName);
-                    return new SsiProject(openFileDialog.FileName);
+                    var project = new SsiProject(openFileDialog.FileName);
+                    return project;
                 }
                 else
                 {
@@ -50,30 +68,50 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
         {
             var json = File.ReadAllText(fileName);
             var project = JsonConvert.DeserializeObject<SsiProject>(json);
-            this.LoadSpriteSheetFromFile(project.SpriteSheetFileName);
+            // this.LoadSpriteSheetFromFile(project.SpriteSheetFileName, project.BackgroundColor.ToColor());
             return project;
         }
 
         protected override void SaveToFile(SsiProject model, string fileName)
         {
+            if (model.BackgroundColor.Equals(ColorArgb.FromColor(Color.Transparent)))
+            {
+                model.BackgroundColor = ColorArgb.Empty;
+            }
+
             var json = JsonConvert.SerializeObject(model);
             File.WriteAllText(fileName, json);
         }
 
+        protected override void OnWorkspaceOpened(WorkspaceOpenedEventArgs<SsiProject> e)
+        {
+            this.LoadSpriteSheetFromFile(e.Model.SpriteSheetFileName, e.Model.BackgroundColor.ToColor());
+
+            base.OnWorkspaceOpened(e);
+        }
+
+        protected override void OnWorkspaceCreated(WorkspaceCreatedEventArgs<SsiProject> e)
+        {
+            this.LoadSpriteSheetFromFile(e.Model.SpriteSheetFileName);
+            base.OnWorkspaceCreated(e);
+        }
+
         protected override void OnWorkspaceClosed(EventArgs e)
         {
-            base.OnWorkspaceClosed(e);
             if (this.spriteSheet != null)
             {
                 this.spriteSheet.PropertyChanged -= SpriteSheet_PropertyChanged;
                 this.spriteSheet.Dispose();
                 this.spriteSheet = null;
             }
+
+            base.OnWorkspaceClosed(e);
         }
 
-        private void LoadSpriteSheetFromFile(string fileName)
+        private void LoadSpriteSheetFromFile(string fileName, Color backgroundColor = default(Color))
         {
-            this.spriteSheet = SpriteSheet.CreateFromFile(fileName);
+            this.spriteSheet = SpriteSheet.CreateFromFile(fileName, backgroundColor);
+
             this.spriteSheet.PropertyChanged += SpriteSheet_PropertyChanged;
         }
 
@@ -87,6 +125,7 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
             if (e.PropertyName.Equals("BackgroundColor"))
             {
                 this.OnSpriteSheetBackgroundColorChanged(EventArgs.Empty);
+                this.Model.BackgroundColor = ColorArgb.FromColor(this.spriteSheet.BackgroundColor);
             }
         }
     }

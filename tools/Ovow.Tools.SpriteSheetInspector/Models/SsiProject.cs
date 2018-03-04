@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,19 +12,65 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
 {
     public sealed class SsiProject : INotifyPropertyChanged
     {
-        [JsonProperty]
-        private readonly ObservableCollection<SsiAction> actions = new ObservableCollection<SsiAction>();
+        private ObservableCollection<SsiAction> actions;
+
+        private SsiProject()
+        {
+            this.backgroundColor = ColorArgb.FromColor(default(Color));
+        }
+
+        public ObservableCollection<SsiAction> Actions
+        {
+            get
+            {
+                return actions;
+            }
+            private set
+            {
+                this.actions = value;
+                this.actions.CollectionChanged += (s, e) =>
+                  {
+                      if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                      {
+                          foreach(SsiAction action in e.NewItems)
+                          {
+                              action.PropertyChanged += (actSender, actEventArgs) => OnPropertyChanged("Action");
+                          }
+                      }
+
+                      OnPropertyChanged("Actions");
+                  };
+            }
+        }
 
         public SsiProject(string spriteSheetFileName)
+            : this()
         {
             this.SpriteSheetFileName = spriteSheetFileName;
-            this.actions.CollectionChanged += (ccs, cce) =>
-              {
-                  OnPropertyChanged("actions");
-              };
+
+            this.Actions = new ObservableCollection<SsiAction>();
         }
 
         public string SpriteSheetFileName { get; }
+
+        private ColorArgb backgroundColor;
+
+        public ColorArgb BackgroundColor
+        {
+            get { return backgroundColor; }
+            set
+            {
+                if (!backgroundColor.A.Equals(value.A) ||
+                    !backgroundColor.R.Equals(value.R) ||
+                    !backgroundColor.G.Equals(value.G) ||
+                    !backgroundColor.B.Equals(value.B))
+                {
+                    OnPropertyChanged("BackgroundColor");
+                }
+
+                backgroundColor = value;
+            }
+        }
 
         public void AddAction(string name)
         {
@@ -33,7 +80,7 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
             }
 
             var action = new SsiAction(name);
-            action.PropertyChanged += (s, e) => OnPropertyChanged("action");
+
             this.actions.Add(action);
         }
 
@@ -44,7 +91,6 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
                 throw new InvalidOperationException($"The action '{action.Name}' already exists.");
             }
 
-            action.PropertyChanged += (s, e) => OnPropertyChanged("action");
             this.actions.Add(action);
         }
 
@@ -77,7 +123,7 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
         }
 
         [JsonIgnore]
-        public int Count => this.actions.Count;
+        public int ActionCount => this.actions.Count;
 
         public event PropertyChangedEventHandler PropertyChanged;
 

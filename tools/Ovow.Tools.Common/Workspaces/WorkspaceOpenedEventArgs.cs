@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Ovow.Tools.Common.Workspaces
 {
-    public sealed class WorkspaceOpenedEventArgs : WorkspaceEventArgs
+    public sealed class WorkspaceOpenedEventArgs<TModel> : WorkspaceEventArgs<TModel>
+        where TModel : INotifyPropertyChanged
     {
-        public WorkspaceOpenedEventArgs(string fileName)
-            : base(fileName)
+        public WorkspaceOpenedEventArgs(string fileName, TModel model)
+            : base(fileName, model)
         {
         }
     }

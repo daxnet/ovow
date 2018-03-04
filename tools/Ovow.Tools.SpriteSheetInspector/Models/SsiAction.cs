@@ -11,18 +11,37 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
 {
     public class SsiAction : INotifyPropertyChanged
     {
-        [JsonProperty]
-        private readonly ObservableCollection<SsiActionFrame> frames = new ObservableCollection<SsiActionFrame>();
+        private ObservableCollection<SsiActionFrame> frames;
 
-        [JsonProperty]
         private string name;
+
+        public ObservableCollection<SsiActionFrame> Frames
+        {
+            get
+            {
+                return frames;
+            }
+            private set
+            {
+                this.frames = value;
+                this.frames.CollectionChanged += (s, e) =>
+                {
+                    if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+                    {
+                        foreach(SsiActionFrame frame in e.NewItems)
+                        {
+                            frame.PropertyChanged += (frSender, frArgs) => OnPropertyChanged("Frame");
+                        }
+                    }
+
+                    this.OnPropertyChanged("Frames");
+                };
+            }
+        }
 
         public SsiAction()
         {
-            this.frames.CollectionChanged += (ccs, cce) =>
-              {
-                  OnPropertyChanged("Frames");
-              };
+            this.Frames = new ObservableCollection<SsiActionFrame>();
         }
 
         public SsiAction(string name)
@@ -54,7 +73,7 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
                 throw new InvalidOperationException($"Frame which has the bounding box index of {frame.BoundingBoxIndex} already exists.");
             }
 
-            frame.PropertyChanged += (s, e) => OnPropertyChanged("Frame");
+            // frame.PropertyChanged += (s, e) => OnPropertyChanged("Frame");
             this.frames.Add(frame);
         }
 
@@ -72,7 +91,7 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
             this.frames.Clear();
         }
 
-        public void MoveUp(int boundingBoxIndex)
+        public void MoveFrameUp(int boundingBoxIndex)
         {
             var f = GetFrame(boundingBoxIndex);
             if (f != null)
@@ -85,7 +104,7 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
             }
         }
 
-        public void MoveDown(int boundingBoxIndex)
+        public void MoveFrameDown(int boundingBoxIndex)
         {
             var f = GetFrame(boundingBoxIndex);
             if (f != null)
@@ -98,7 +117,7 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
             }
         }
 
-        public void MoveTop(int boundingBoxIndex)
+        public void MoveFrameTop(int boundingBoxIndex)
         {
             var f = GetFrame(boundingBoxIndex);
             if (f != null)
@@ -111,7 +130,7 @@ namespace Ovow.Tools.SpriteSheetInspector.Models
             }
         }
 
-        public void MoveBottom(int boundingBoxIndex)
+        public void MoveFrameBottom(int boundingBoxIndex)
         {
             var f = GetFrame(boundingBoxIndex);
             if (f != null)

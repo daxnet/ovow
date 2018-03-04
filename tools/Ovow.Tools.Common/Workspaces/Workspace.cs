@@ -15,12 +15,12 @@ namespace Ovow.Tools.Common.Workspaces
         public event EventHandler<WorkspaceCreatedEventArgs<TModel>> WorkspaceCreated;
         public event EventHandler WorkspaceChanged;
         public event EventHandler WorkspaceClosed;
-        public event EventHandler<WorkspaceOpenedEventArgs> WorkspaceOpened;
-        public event EventHandler<WorkspaceSavedEventArgs> WorkspaceSaved;
+        public event EventHandler<WorkspaceOpenedEventArgs<TModel>> WorkspaceOpened;
+        public event EventHandler<WorkspaceSavedEventArgs<TModel>> WorkspaceSaved;
 
         protected Workspace()
         {
-            
+
         }
 
         public bool HasSaved
@@ -30,31 +30,40 @@ namespace Ovow.Tools.Common.Workspaces
 
         public TModel Model => this.model;
 
-        public void New()
+        public bool New()
         {
-            this.model = Create();
-
-            if (this.model != null)
+            var creatingModel = Create();
+            if (creatingModel != null)
             {
-                this.model.PropertyChanged += (ps, pe) =>
-                  {
-                      this.OnWorkspaceChanged(EventArgs.Empty);
-                  };
+                var canClose = this.Close();
+                if (canClose)
+                {
+                    this.model = creatingModel;
 
-                this.OnWorkspaceCreated(new WorkspaceCreatedEventArgs<TModel>(this.model));
-                this.OnWorkspaceChanged(EventArgs.Empty);
+                    this.model.PropertyChanged += (ps, pe) =>
+                      {
+                          this.OnWorkspaceChanged(EventArgs.Empty);
+                      };
+
+                    this.OnWorkspaceCreated(new WorkspaceCreatedEventArgs<TModel>(this.model));
+                    this.OnWorkspaceChanged(EventArgs.Empty);
+
+                    return true;
+                }
             }
+
+            return false;
         }
 
         public bool Open()
         {
             using (var openFileDialog = new OpenFileDialog
-                {
-                    Filter = $"{WorkspaceFileDescription}(*.{WorkspaceFileExtension})|*.{WorkspaceFileExtension}",
-                    AddExtension = true,
-                    DefaultExt = WorkspaceFileExtension,
-                    Title = "Open Workspace"
-                })
+            {
+                Filter = $"{WorkspaceFileDescription}(*.{WorkspaceFileExtension})|*.{WorkspaceFileExtension}",
+                AddExtension = true,
+                DefaultExt = WorkspaceFileExtension,
+                Title = "Open Workspace"
+            })
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -64,7 +73,8 @@ namespace Ovow.Tools.Common.Workspaces
                           this.OnWorkspaceChanged(EventArgs.Empty);
                       };
 
-                    this.OnWorkspaceOpened(new WorkspaceOpenedEventArgs(openFileDialog.FileName));
+                    this.workspaceFileName = openFileDialog.FileName;
+                    this.OnWorkspaceOpened(new WorkspaceOpenedEventArgs<TModel>(openFileDialog.FileName, this.model));
                     return true;
                 }
 
@@ -79,7 +89,7 @@ namespace Ovow.Tools.Common.Workspaces
                 try
                 {
                     this.SaveToFile(this.model, workspaceFileName);
-                    this.OnWorkspaceSaved(new WorkspaceSavedEventArgs(workspaceFileName));
+                    this.OnWorkspaceSaved(new WorkspaceSavedEventArgs<TModel>(workspaceFileName, this.model));
                     return true;
                 }
                 catch
@@ -102,7 +112,7 @@ namespace Ovow.Tools.Common.Workspaces
                         try
                         {
                             this.SaveToFile(this.model, saveFileDialog.FileName);
-                            this.OnWorkspaceSaved(new WorkspaceSavedEventArgs(saveFileDialog.FileName));
+                            this.OnWorkspaceSaved(new WorkspaceSavedEventArgs<TModel>(saveFileDialog.FileName, this.model));
                             this.workspaceFileName = saveFileDialog.FileName;
                             return true;
                         }
@@ -116,7 +126,7 @@ namespace Ovow.Tools.Common.Workspaces
                         return false;
                     }
                 }
-                
+
             }
         }
 
@@ -139,6 +149,7 @@ namespace Ovow.Tools.Common.Workspaces
                     if (savedResult)
                     {
                         OnWorkspaceClosed(EventArgs.Empty);
+                        changed = false;
                     }
 
                     return savedResult;
@@ -146,6 +157,7 @@ namespace Ovow.Tools.Common.Workspaces
             }
 
             OnWorkspaceClosed(EventArgs.Empty);
+            changed = false;
             return true;
         }
 
@@ -166,13 +178,13 @@ namespace Ovow.Tools.Common.Workspaces
             changed = true;
         }
 
-        protected virtual void OnWorkspaceOpened(WorkspaceOpenedEventArgs e)
+        protected virtual void OnWorkspaceOpened(WorkspaceOpenedEventArgs<TModel> e)
         {
             this.WorkspaceOpened?.Invoke(this, e);
             changed = false;
         }
 
-        protected virtual void OnWorkspaceSaved(WorkspaceSavedEventArgs e)
+        protected virtual void OnWorkspaceSaved(WorkspaceSavedEventArgs<TModel> e)
         {
             this.WorkspaceSaved?.Invoke(this, e);
             changed = false;
@@ -181,6 +193,9 @@ namespace Ovow.Tools.Common.Workspaces
         protected virtual void OnWorkspaceClosed(EventArgs e)
         {
             this.WorkspaceClosed?.Invoke(this, e);
+
+            this.changed = false;
+            this.workspaceFileName = null;
         }
 
         protected abstract void SaveToFile(TModel model, string fileName);

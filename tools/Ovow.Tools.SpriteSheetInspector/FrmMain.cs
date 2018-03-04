@@ -1,5 +1,24 @@
-﻿using Ovow.Framework;
-using Ovow.Framework.Sprites;
+﻿// ----------------------------------------------------------------------------
+//   ____                    ____                                   __
+//  / __ \_  _____ _    __  / __/______ ___ _  ___ _    _____  ____/ /__
+// / /_/ / |/ / _ \ |/|/ / / _// __/ _ `/  ' \/ -_) |/|/ / _ \/ __/  '_/
+// \____/|___/\___/__,__/ /_/ /_/  \_,_/_/_/_/\__/|__,__/\___/_/ /_/\_\
+//
+// A 2D gaming framework on MonoGame
+//
+// Copyright (C) 2018 by daxnet.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//    http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------
+
+using Ovow.Framework;
 using Ovow.Tools.Common;
 using Ovow.Tools.Common.Workspaces;
 using Ovow.Tools.SpriteSheetInspector.Models;
@@ -8,14 +27,11 @@ using Ovow.Tools.SpriteSheetInspector.UserControls;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Ovow.Tools.SpriteSheetInspector
@@ -23,14 +39,17 @@ namespace Ovow.Tools.SpriteSheetInspector
     public partial class FrmMain : Form
     {
         private readonly SsiWorkspace workspace = new SsiWorkspace();
-        private List<BorderedPictureBox> spritePictureBoxes = new List<BorderedPictureBox>();
+        private readonly List<BorderedPictureBox> spritePictureBoxes = new List<BorderedPictureBox>();
+        private readonly List<Image> animationImages = new List<Image>();
+
         private TreeNode rootNode;
         private TreeNode spritesNode;
         private TreeNode actionsNode;
-        private List<Image> animationImages = new List<Image>();
 
         private delegate void SetAnimationPictureDelegate(Image picture);
+
         private delegate int GetFPSValueDelegate();
+
         private delegate void SetControlButtonStatusDelegate(bool playing);
 
         public FrmMain()
@@ -56,6 +75,7 @@ namespace Ovow.Tools.SpriteSheetInspector
             this.SetControlButtonStatus(false);
             this.btnAnimate.Enabled = false;
             this.tbFPS.Enabled = false;
+            this.cbAnimationActions.Enabled = false;
 
             mnuSaveProject.Enabled = false;
             tbtnSaveProject.Enabled = false;
@@ -69,7 +89,7 @@ namespace Ovow.Tools.SpriteSheetInspector
             this.ClearSpriteBoundingBoxes();
             this.tv.Nodes.Clear();
 
-            this.backgroundWorker1.CancelAsync();
+            this.animationExecutor.CancelAsync();
 
             this.pbAnimation.Image = null;
 
@@ -79,12 +99,14 @@ namespace Ovow.Tools.SpriteSheetInspector
             }
 
             this.animationImages.Clear();
+            this.cbAnimationActions.Items.Clear();
 
             this.btnAnimate.Enabled = false;
             this.tbFPS.Enabled = false;
             this.mnuCloseProject.Enabled = false;
             this.mnuSaveProject.Enabled = false;
             this.tbtnSaveProject.Enabled = false;
+            this.cbAnimationActions.Enabled = false;
         }
 
         private void Workspace_WorkspaceCreated(object sender, WorkspaceCreatedEventArgs<SsiProject> e)
@@ -95,18 +117,70 @@ namespace Ovow.Tools.SpriteSheetInspector
             this.mnuCloseProject.Enabled = true;
         }
 
-        private void Workspace_WorkspaceSaved(object sender, WorkspaceSavedEventArgs e)
+        private void Workspace_WorkspaceSaved(object sender, WorkspaceSavedEventArgs<SsiProject> e)
         {
             mnuSaveProject.Enabled = false;
             tbtnSaveProject.Enabled = false;
         }
 
-        private void Workspace_WorkspaceOpened(object sender, WorkspaceOpenedEventArgs e)
+        private void Workspace_WorkspaceOpened(object sender, WorkspaceOpenedEventArgs<SsiProject> e)
         {
             this.pictureBox.Image = workspace.SpriteSheet.Bitmap;
             this.RecreateSpriteBoundingBoxes();
+            this.BindAnimationActions();
+            
             this.propertyGrid.SelectedObject = workspace.SpriteSheet;
             this.mnuCloseProject.Enabled = true;
+        }
+
+        private void BindAnimationActions()
+        {
+            cbAnimationActions.Items.Clear();
+            if (this.workspace?.Model?.ActionCount > 0)
+            {
+                foreach(var action in this.workspace?.Model?.Actions)
+                {
+                    cbAnimationActions.Items.Add(action);
+                }
+
+                cbAnimationActions.SelectedItem = this.workspace?.Model?.Actions.FirstOrDefault();
+                BindAnimationForAction((SsiAction)cbAnimationActions.SelectedItem);
+                btnAnimate.Enabled = true;
+                tbFPS.Enabled = true;
+                cbAnimationActions.Enabled = true;
+            }
+            else
+            {
+                btnAnimate.Enabled = false;
+                tbFPS.Enabled = false;
+                cbAnimationActions.Enabled = false;
+            }
+        }
+
+        private void BindAnimationForAction(SsiAction action)
+        {
+            animationImages.Clear();
+            foreach(var actionFrame in action.Frames)
+            {
+                var spriteFrameImage = new Bitmap(actionFrame.Width, actionFrame.Height);
+                using (var graphics = Graphics.FromImage(spriteFrameImage))
+                {
+                    graphics.DrawImage(this.workspace.SpriteSheet.Bitmap,
+                        new Rectangle(0, 0, actionFrame.Width, actionFrame.Height),
+                        new Rectangle(actionFrame.X, actionFrame.Y, actionFrame.Width, actionFrame.Height), GraphicsUnit.Pixel);
+                }
+
+                animationImages.Add(spriteFrameImage);
+            }
+
+            if (animationImages.Count > 0)
+            {
+                SetAnimationPicture(animationImages[0]);
+            }
+            else
+            {
+                SetAnimationPicture(null);
+            }
         }
 
         private void Workspace_WorkspaceChanged(object sender, EventArgs e)
@@ -146,10 +220,15 @@ namespace Ovow.Tools.SpriteSheetInspector
                 this.tv.Nodes.Clear();
                 this.rootNode = this.tv.Nodes.Add(Path.GetFileName(this.workspace.SpriteSheet.FileName));
                 this.rootNode.ImageKey = this.rootNode.SelectedImageKey = this.rootNode.StateImageKey = "root";
+                this.rootNode.Tag = new TreeNodePayload(TreeNodeType.Root);
+
                 this.spritesNode = this.rootNode.Nodes.Add("Sprites");
                 this.spritesNode.ImageKey = this.spritesNode.SelectedImageKey = this.spritesNode.StateImageKey = "sprites";
+                this.spritesNode.Tag = new TreeNodePayload(TreeNodeType.SpritesRoot);
+
                 this.actionsNode = this.rootNode.Nodes.Add("Actions");
                 this.actionsNode.ImageKey = this.actionsNode.SelectedImageKey = this.actionsNode.StateImageKey = "actions";
+                this.actionsNode.Tag = new TreeNodePayload(TreeNodeType.ActionsRoot);
 
                 foreach (var bb in this.workspace.SpriteSheet.SpriteBoundingBoxes)
                 {
@@ -166,23 +245,41 @@ namespace Ovow.Tools.SpriteSheetInspector
 
                     imageList1.Images.Add($"Sprite_{bb.Key}", img);
 
-                    var boundingBox = CreateBoundingBox(bb.Key, width, height);
+                    var boundingBox = CreateSpriteBoundingBox(bb.Key, width, height);
                     boundingBox.Location = new Point(x, y);
                     this.pictureBox.Controls.Add(boundingBox);
 
                     var spriteNode = spritesNode.Nodes.Add($"{bb.Key} ([{x},{y}] - [{x + width},{y + height}])");
                     spriteNode.ImageKey = spriteNode.SelectedImageKey = spriteNode.StateImageKey = $"Sprite_{bb.Key}";
-                    spriteNode.Tag = bb;
+                    spriteNode.Tag = new TreeNodePayload(TreeNodeType.Sprite, bb);
                 }
 
-                tv.ExpandAll();
+                foreach (var action in this.workspace?.Model?.Actions)
+                {
+                    var actionNode = actionsNode.Nodes.Add(action.Name, action.Name, "action", "action");
+                    actionNode.Tag = new TreeNodePayload(TreeNodeType.Action, action.Name);
+
+                    foreach (var frame in action.Frames)
+                    {
+                        var actionFrameNode = actionNode.Nodes.Add(frame.BoundingBoxIndex.ToString());
+                        actionFrameNode.Tag = new TreeNodePayload(TreeNodeType.ActionFrame, new KeyValuePair<int, Rectangle>(frame.BoundingBoxIndex, new Rectangle(frame.X, frame.Y, frame.Width, frame.Height)));
+                        actionFrameNode.ImageKey = actionFrameNode.SelectedImageKey = $"Sprite_{frame.BoundingBoxIndex}";
+                    }
+                }
+
+                rootNode.Expand();
+                spritesNode.Expand();
+                actionsNode.Expand();
+
+                tv.SelectedNode = rootNode;
             }
         }
 
-        private PictureBox CreateBoundingBox(int index, int width, int height)
+        private PictureBox CreateSpriteBoundingBox(int index, int width, int height)
         {
             var borderColor = Color.Black;
-            if (this.workspace.SpriteSheet.BackgroundColor == Color.Transparent || this.workspace.SpriteSheet.BackgroundColor == default(Color))
+            if (this.workspace.SpriteSheet.BackgroundColor.RgbEquals(Color.Transparent) ||
+                this.workspace.SpriteSheet.BackgroundColor.RgbEquals(default(Color)))
             {
                 borderColor = SystemColors.Control.Inverse();
             }
@@ -213,19 +310,14 @@ namespace Ovow.Tools.SpriteSheetInspector
               {
                   var idx = Convert.ToInt32(pb.Tag);
                   this.SelectSpriteOnSheet(idx);
-                  foreach (TreeNode node in tv.Nodes[0].Nodes[0].Nodes)
+                  foreach (TreeNode node in spritesNode.Nodes)
                   {
-                      var kvp = (KeyValuePair<int, Rectangle>)node.Tag;
+                      var kvp = (KeyValuePair<int, Rectangle>)((TreeNodePayload)node.Tag).Data;
                       if (kvp.Key == idx)
                       {
                           tv.SelectedNode = node;
                           tv.ExpandAll();
                       }
-                  }
-
-                  if (mcEventArgs.Button == MouseButtons.Right)
-                  {
-
                   }
               };
 
@@ -294,24 +386,8 @@ namespace Ovow.Tools.SpriteSheetInspector
 
         private void StartAnimation()
         {
-            animationImages.Clear();
-            foreach (TreeNode actionSpriteNode in tv.SelectedNode.Nodes)
-            {
-                var boundingBox = (KeyValuePair<int, Rectangle>)actionSpriteNode.Tag;
-                var spritePicture = new Bitmap(boundingBox.Value.Width, boundingBox.Value.Height);
-                using (var graphics = Graphics.FromImage(spritePicture))
-                {
-                    graphics.DrawImage(this.workspace.SpriteSheet.Bitmap,
-                        new Rectangle(0, 0, boundingBox.Value.Width, boundingBox.Value.Height),
-                        boundingBox.Value,
-                        GraphicsUnit.Pixel);
-                }
-
-                animationImages.Add(spritePicture);
-            }
-
             this.SetControlButtonStatus(true);
-            backgroundWorker1.RunWorkerAsync();
+            animationExecutor.RunWorkerAsync();
         }
 
         private void SetControlButtonStatus(bool playing)
@@ -325,10 +401,19 @@ namespace Ovow.Tools.SpriteSheetInspector
             {
                 if (playing)
                 {
+                    cmnuActionAnimate.Enabled = false;
+                    cbAnimationActions.Enabled = false;
                     btnAnimate.Image = Resources.pause;
                 }
                 else
                 {
+                    if (animationImages.Count > 0)
+                    {
+                        SetAnimationPicture(animationImages[0]);
+                    }
+
+                    cmnuActionAnimate.Enabled = true;
+                    cbAnimationActions.Enabled = true;
                     btnAnimate.Image = Resources.play;
                 }
             }
@@ -351,10 +436,12 @@ namespace Ovow.Tools.SpriteSheetInspector
         {
             using (new LengthyOperation(this))
             {
-                if (this.workspace.Close())
-                {
-                    this.workspace.New();
-                }
+                //    if (this.workspace.Close())
+                //    {
+                //        this.workspace.New();
+                //    }
+                //}
+                this.workspace.New();
             }
         }
 
@@ -381,43 +468,78 @@ namespace Ovow.Tools.SpriteSheetInspector
                 this.workspace.Close();
             }
         }
-        #endregion
+
+        private void Action_Exit(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        #endregion Action Methods
 
         private void Action_NewAction(object sender, EventArgs e)
         {
-
             using (var dlg = new FrmTextInput("Action Name:", AllActionNames))
             {
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    actionsNode.Nodes.Add(dlg.InputText.Trim(), dlg.InputText.Trim(), "action", "action");
+                    var actionName = dlg.InputText.Trim();
+                    var action = new SsiAction(actionName);
+                    this.workspace.Model.AddAction(action);
 
+                    this.BindAnimationActions();
+
+                    var actionNode = actionsNode.Nodes.Add(actionName, actionName, "action", "action");
+                    actionNode.Tag = new TreeNodePayload(TreeNodeType.Action, actionName);
                     actionsNode.Expand();
                 }
             }
         }
 
-        private void Action_MoveActionSpriteUp(object sender, EventArgs e)
+        private void Action_MoveActionFrameUp(object sender, EventArgs e)
         {
-            tv.SelectedNode.MoveUp();
+            var actionFrameNode = tv.SelectedNode;
+            var actionName = actionFrameNode.Parent.Text;
+            var actionFrameBoundingBoxIndex = ((KeyValuePair<int, Rectangle>)((TreeNodePayload)actionFrameNode.Tag).Data).Key;
+            var action = this.workspace.Model.GetAction(actionName);
+            action.MoveFrameUp(actionFrameBoundingBoxIndex);
+            actionFrameNode.MoveUp();
+            this.BindAnimationForAction(action);
         }
 
-        private void Action_MoveActionSpriteTop(object sender, EventArgs e)
+        private void Action_MoveActionFrameTop(object sender, EventArgs e)
         {
-            tv.SelectedNode.MoveTop();
+            var actionFrameNode = tv.SelectedNode;
+            var actionName = actionFrameNode.Parent.Text;
+            var actionFrameBoundingBoxIndex = ((KeyValuePair<int, Rectangle>)((TreeNodePayload)actionFrameNode.Tag).Data).Key;
+            var action = this.workspace.Model.GetAction(actionName);
+            action.MoveFrameTop(actionFrameBoundingBoxIndex);
+            actionFrameNode.MoveTop();
+            this.BindAnimationForAction(action);
         }
 
-        private void Action_MoveActionSpriteDown(object sender, EventArgs e)
+        private void Action_MoveActionFrameDown(object sender, EventArgs e)
         {
-            tv.SelectedNode.MoveDown();
+            var actionFrameNode = tv.SelectedNode;
+            var actionName = actionFrameNode.Parent.Text;
+            var actionFrameBoundingBoxIndex = ((KeyValuePair<int, Rectangle>)((TreeNodePayload)actionFrameNode.Tag).Data).Key;
+            var action = this.workspace.Model.GetAction(actionName);
+            action.MoveFrameDown(actionFrameBoundingBoxIndex);
+            actionFrameNode.MoveDown();
+            this.BindAnimationForAction(action);
         }
 
-        private void Action_MoveActionSpriteBottom(object sender, EventArgs e)
+        private void Action_MoveActionFrameBottom(object sender, EventArgs e)
         {
-            tv.SelectedNode.MoveBottom();
+            var actionFrameNode = tv.SelectedNode;
+            var actionName = actionFrameNode.Parent.Text;
+            var actionFrameBoundingBoxIndex = ((KeyValuePair<int, Rectangle>)((TreeNodePayload)actionFrameNode.Tag).Data).Key;
+            var action = this.workspace.Model.GetAction(actionName);
+            action.MoveFrameBottom(actionFrameBoundingBoxIndex);
+            actionFrameNode.MoveBottom();
+            this.BindAnimationForAction(action);
         }
 
-        private void Action_DeleteActionSpriteNode(object sender, EventArgs e)
+        private void Action_DeleteActionFrameNode(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure to delete the selected sprite?",
                 "Confirm",
@@ -425,6 +547,20 @@ namespace Ovow.Tools.SpriteSheetInspector
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2) == DialogResult.Yes)
             {
+                var actionFrameNode = tv.SelectedNode;
+                var actionNode = actionFrameNode.Parent;
+                var actionFrameIndex = ((KeyValuePair<int, Rectangle>)(((TreeNodePayload)actionFrameNode.Tag).Data)).Key;
+                var actionName = actionNode.Text;
+                var action = this.workspace
+                    .Model
+                    .GetAction(actionName);
+
+                action.RemoveFrame(actionFrameIndex);
+                if (cbAnimationActions.Items.Count > 0 && ((SsiAction)cbAnimationActions.SelectedItem).Name.Equals(actionName))
+                {
+                    this.BindAnimationForAction(action);
+                }
+
                 tv.SelectedNode.RemoveEx();
             }
         }
@@ -439,24 +575,18 @@ namespace Ovow.Tools.SpriteSheetInspector
             var node = e.Node;
             if (node != null)
             {
-                if (node.Tag is KeyValuePair<int, Rectangle> boundingBox)
+                TreeNodePayload payload = (TreeNodePayload)node.Tag;
+                switch (payload.Type)
                 {
-                    this.SelectSpriteOnSheet(boundingBox.Key);
-                }
-                else
-                {
-                    this.SelectSpriteOnSheet(-1);
-                }
+                    case TreeNodeType.Sprite:
+                    case TreeNodeType.ActionFrame:
+                        var boundingBox = (KeyValuePair<int, Rectangle>)payload.Data;
+                        this.SelectSpriteOnSheet(boundingBox.Key);
+                        break;
 
-                if (node.Parent == actionsNode)
-                {
-                    btnAnimate.Enabled = true;
-                    tbFPS.Enabled = true;
-                }
-                else
-                {
-                    btnAnimate.Enabled = false;
-                    tbFPS.Enabled = false;
+                    default:
+                        this.SelectSpriteOnSheet(-1);
+                        break;
                 }
             }
         }
@@ -484,19 +614,22 @@ namespace Ovow.Tools.SpriteSheetInspector
             if (node != null)
             {
                 tv.SelectedNode = node;
+                var payload = (TreeNodePayload)node.Tag;
                 if (e.Button == MouseButtons.Right)
                 {
-                    if (node == actionsNode)
+                    switch (payload.Type)
                     {
-                        cmsActions.Show(tv, e.X, e.Y);
-                    }
-                    else if (node.Parent == actionsNode)
-                    {
-                        cmsAction.Show(tv, e.X, e.Y);
-                    }
-                    else if (node.Parent?.Parent == actionsNode)
-                    {
-                        cmsActionSprite.Show(tv, e.X, e.Y);
+                        case TreeNodeType.ActionsRoot:
+                            cmsActions.Show(tv, e.X, e.Y);
+                            break;
+
+                        case TreeNodeType.Action:
+                            cmsAction.Show(tv, e.X, e.Y);
+                            break;
+
+                        case TreeNodeType.ActionFrame:
+                            cmsActionSprite.Show(tv, e.X, e.Y);
+                            break;
                     }
                 }
             }
@@ -505,11 +638,6 @@ namespace Ovow.Tools.SpriteSheetInspector
         private void pnlMain_Scroll(object sender, ScrollEventArgs e)
         {
             this.InvalidatePanel();
-        }
-
-        private void tv_DragEnter(object sender, DragEventArgs e)
-        {
-
         }
 
         private void cmsBoundingBox_Opening(object sender, CancelEventArgs e)
@@ -528,18 +656,37 @@ namespace Ovow.Tools.SpriteSheetInspector
 
             foreach (var actionName in AllActionNames)
             {
-                var toolStripItem = cmnuAddToAction.DropDownItems.Add(actionName, Resources.action, (cmnuSender, cmnuEventArgs) =>
-                {
-                    var action = ((ToolStripItem)cmnuSender).Tag as string;
-                    var actionNode = actionsNode.Nodes.Find(action, true).First();
-                    var actionFrameNode = actionNode.Nodes.Add(boundingBoxIndex.ToString());
-                    actionFrameNode.Tag = workspace.SpriteSheet.SpriteBoundingBoxes.First(x => x.Key == boundingBoxIndex);
-                    actionFrameNode.ImageKey = actionFrameNode.SelectedImageKey = $"Sprite_{boundingBoxIndex}";
-                });
+                var toolStripItem = cmnuAddToAction.DropDownItems.Add(actionName, Resources.action,
+                    (cmnuSender, cmnuEventArgs) =>
+                        {
+                            var actionNameLocal = ((ToolStripItem)cmnuSender).Tag as string;
+                            var actionNode = actionsNode.Nodes.Find(actionNameLocal, true).First();
+
+                            var selectedBoundingBox = workspace.SpriteSheet.SpriteBoundingBoxes.First(x => x.Key == boundingBoxIndex);
+                            var action = workspace.Model.GetAction(actionNameLocal);
+
+                            action.AddFrame(new SsiActionFrame
+                            {
+                                BoundingBoxIndex = boundingBoxIndex,
+                                X = selectedBoundingBox.Value.X,
+                                Y = selectedBoundingBox.Value.Y,
+                                Width = selectedBoundingBox.Value.Width,
+                                Height = selectedBoundingBox.Value.Height
+                            });
+
+                            if (cbAnimationActions.Items.Count > 0 &&
+                            ((SsiAction)cbAnimationActions.SelectedItem).Name.Equals(actionNameLocal))
+                            {
+                                this.BindAnimationForAction(action);
+                            }
+
+                            var actionFrameNode = actionNode.Nodes.Add(boundingBoxIndex.ToString());
+                            actionFrameNode.Tag = new TreeNodePayload(TreeNodeType.ActionFrame, selectedBoundingBox);
+                            actionFrameNode.ImageKey = actionFrameNode.SelectedImageKey = $"Sprite_{boundingBoxIndex}";
+                        });
 
                 toolStripItem.Tag = actionName;
             }
-
         }
 
         private void cmsAction_Opening(object sender, CancelEventArgs e)
@@ -552,7 +699,6 @@ namespace Ovow.Tools.SpriteSheetInspector
             var node = tv.GetNodeAt(tv.PointToClient(cmsActionSprite.Bounds.Location));
             if (node != null)
             {
-
                 if (node == node.Parent.Nodes[0])
                 {
                     cmnuMoveUp.Enabled = cmnuMoveTop.Enabled = false;
@@ -564,13 +710,13 @@ namespace Ovow.Tools.SpriteSheetInspector
             }
         }
 
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        private void animationExecutor_DoWork(object sender, DoWorkEventArgs e)
         {
             var index = 0;
             var total = animationImages.Count;
             while (true)
             {
-                if (backgroundWorker1.CancellationPending)
+                if (animationExecutor.CancellationPending)
                 {
                     e.Cancel = true;
                     break;
@@ -596,9 +742,9 @@ namespace Ovow.Tools.SpriteSheetInspector
 
         private void btnAnimate_Click(object sender, EventArgs e)
         {
-            if (backgroundWorker1.IsBusy)
+            if (animationExecutor.IsBusy)
             {
-                backgroundWorker1.CancelAsync();
+                animationExecutor.CancelAsync();
             }
             else
             {
@@ -609,6 +755,12 @@ namespace Ovow.Tools.SpriteSheetInspector
         private void FrmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = !this.workspace.Close();
+        }
+
+        private void cbAnimationActions_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var action = (SsiAction)cbAnimationActions.SelectedItem;
+            this.BindAnimationForAction(action);
         }
     }
 }
