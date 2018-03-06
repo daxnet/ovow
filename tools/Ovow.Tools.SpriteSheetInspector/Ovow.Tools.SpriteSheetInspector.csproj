@@ -7,7 +7,7 @@
     <ProjectGuid>{AF3CBE86-3EA5-46C3-B944-DB7B86A27E0B}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Ovow.Tools.SpriteSheetInspector</RootNamespace>
-    <AssemblyName>Ovow.Tools.SpriteSheetInspector</AssemblyName>
+    <AssemblyName>ossinspect</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -30,6 +30,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>sprite-sheet-inspector.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -141,6 +144,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\cross.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\page_go.png" />
+    <None Include="Resources\plus.png" />
+    <None Include="Resources\cross-script.png" />
+    <Content Include="sprite-sheet-inspector.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

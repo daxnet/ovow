@@ -29,21 +29,15 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmMain));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuNewProject = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuOpenProject = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuSaveProject = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
-            this.mnuCloseProject = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuHelp = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tbtnNewProject = new System.Windows.Forms.ToolStripButton();
-            this.tbtnOpenProject = new System.Windows.Forms.ToolStripButton();
-            this.tbtnSaveProject = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
@@ -52,33 +46,42 @@
             this.lblTreeViewTitle = new System.Windows.Forms.Label();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.pnlMain = new System.Windows.Forms.Panel();
-            this.pictureBox = new System.Windows.Forms.PictureBox();
             this.splitContainer4 = new System.Windows.Forms.SplitContainer();
             this.propertyGrid = new System.Windows.Forms.PropertyGrid();
             this.lblPropertyTitle = new System.Windows.Forms.Label();
             this.cbAnimationActions = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.lblAnimationPanelTitle = new System.Windows.Forms.Label();
-            this.pbAnimation = new System.Windows.Forms.PictureBox();
             this.tbFPS = new System.Windows.Forms.TrackBar();
             this.btnAnimate = new System.Windows.Forms.Button();
             this.openSpriteSheetImageDialog = new System.Windows.Forms.OpenFileDialog();
             this.cmsActions = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.cmnuNewAction = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.normalizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmnuExportAction = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsBoundingBox = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.cmnuAddToAction = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsActionSprite = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.cmnuMoveTop = new System.Windows.Forms.ToolStripMenuItem();
             this.cmnuMoveUp = new System.Windows.Forms.ToolStripMenuItem();
             this.cmnuMoveDown = new System.Windows.Forms.ToolStripMenuItem();
             this.cmnuMoveBottom = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.cmnuDeleteAction = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsAction = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.cmnuActionAnimate = new System.Windows.Forms.ToolStripMenuItem();
             this.animationExecutor = new System.ComponentModel.BackgroundWorker();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.pictureBox = new System.Windows.Forms.PictureBox();
+            this.pbAnimation = new System.Windows.Forms.PictureBox();
+            this.tbtnNewProject = new System.Windows.Forms.ToolStripButton();
+            this.tbtnOpenProject = new System.Windows.Forms.ToolStripButton();
+            this.tbtnSaveProject = new System.Windows.Forms.ToolStripButton();
+            this.mnuNewProject = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpenProject = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuSaveProject = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuCloseProject = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmnuNewAction = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmnuAddToAction = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmnuDeleteActionFrame = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmnuActionAnimate = new System.Windows.Forms.ToolStripMenuItem();
+            this.cmnuDeleteAction = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -93,17 +96,17 @@
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             this.pnlMain.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).BeginInit();
             this.splitContainer4.Panel1.SuspendLayout();
             this.splitContainer4.Panel2.SuspendLayout();
             this.splitContainer4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbAnimation)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbFPS)).BeginInit();
             this.cmsActions.SuspendLayout();
             this.cmsBoundingBox.SuspendLayout();
             this.cmsActionSprite.SuspendLayout();
             this.cmsAction.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbAnimation)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -131,45 +134,10 @@
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
             // 
-            // mnuNewProject
-            // 
-            this.mnuNewProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.new_proj;
-            this.mnuNewProject.Name = "mnuNewProject";
-            this.mnuNewProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.mnuNewProject.Size = new System.Drawing.Size(155, 22);
-            this.mnuNewProject.Text = "&New...";
-            this.mnuNewProject.Click += new System.EventHandler(this.Action_NewProject);
-            // 
-            // mnuOpenProject
-            // 
-            this.mnuOpenProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.open_proj;
-            this.mnuOpenProject.Name = "mnuOpenProject";
-            this.mnuOpenProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.mnuOpenProject.Size = new System.Drawing.Size(155, 22);
-            this.mnuOpenProject.Text = "&Open...";
-            this.mnuOpenProject.Click += new System.EventHandler(this.Action_OpenProject);
-            // 
-            // mnuSaveProject
-            // 
-            this.mnuSaveProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.save_proj;
-            this.mnuSaveProject.Name = "mnuSaveProject";
-            this.mnuSaveProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.mnuSaveProject.Size = new System.Drawing.Size(155, 22);
-            this.mnuSaveProject.Text = "&Save";
-            this.mnuSaveProject.Click += new System.EventHandler(this.Action_SaveProject);
-            // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(152, 6);
-            // 
-            // mnuCloseProject
-            // 
-            this.mnuCloseProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.close_project;
-            this.mnuCloseProject.Name = "mnuCloseProject";
-            this.mnuCloseProject.Size = new System.Drawing.Size(155, 22);
-            this.mnuCloseProject.Text = "&Close";
-            this.mnuCloseProject.Click += new System.EventHandler(this.Action_CloseProject);
             // 
             // toolStripMenuItem4
             // 
@@ -210,36 +178,6 @@
             this.toolStrip1.Size = new System.Drawing.Size(784, 25);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
-            // 
-            // tbtnNewProject
-            // 
-            this.tbtnNewProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tbtnNewProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.new_proj;
-            this.tbtnNewProject.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tbtnNewProject.Name = "tbtnNewProject";
-            this.tbtnNewProject.Size = new System.Drawing.Size(23, 22);
-            this.tbtnNewProject.Text = "toolStripButton2";
-            this.tbtnNewProject.Click += new System.EventHandler(this.Action_NewProject);
-            // 
-            // tbtnOpenProject
-            // 
-            this.tbtnOpenProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tbtnOpenProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.open_proj;
-            this.tbtnOpenProject.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tbtnOpenProject.Name = "tbtnOpenProject";
-            this.tbtnOpenProject.Size = new System.Drawing.Size(23, 22);
-            this.tbtnOpenProject.Text = "Open Project";
-            this.tbtnOpenProject.Click += new System.EventHandler(this.Action_OpenProject);
-            // 
-            // tbtnSaveProject
-            // 
-            this.tbtnSaveProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tbtnSaveProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.save_proj;
-            this.tbtnSaveProject.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tbtnSaveProject.Name = "tbtnSaveProject";
-            this.tbtnSaveProject.Size = new System.Drawing.Size(23, 22);
-            this.tbtnSaveProject.Text = "Save Project";
-            this.tbtnSaveProject.Click += new System.EventHandler(this.Action_SaveProject);
             // 
             // toolStripSeparator1
             // 
@@ -346,16 +284,6 @@
             this.pnlMain.Scroll += new System.Windows.Forms.ScrollEventHandler(this.pnlMain_Scroll);
             this.pnlMain.Click += new System.EventHandler(this.pnlMain_Click);
             // 
-            // pictureBox
-            // 
-            this.pictureBox.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox.Name = "pictureBox";
-            this.pictureBox.Size = new System.Drawing.Size(100, 50);
-            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBox.TabIndex = 0;
-            this.pictureBox.TabStop = false;
-            this.pictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseClick);
-            // 
             // splitContainer4
             // 
             this.splitContainer4.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -438,19 +366,6 @@
             this.lblAnimationPanelTitle.Text = "Animation Panel";
             this.lblAnimationPanelTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // pbAnimation
-            // 
-            this.pbAnimation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pbAnimation.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pbAnimation.Location = new System.Drawing.Point(12, 110);
-            this.pbAnimation.Name = "pbAnimation";
-            this.pbAnimation.Size = new System.Drawing.Size(170, 169);
-            this.pbAnimation.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pbAnimation.TabIndex = 8;
-            this.pbAnimation.TabStop = false;
-            // 
             // tbFPS
             // 
             this.tbFPS.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -483,27 +398,21 @@
             this.cmsActions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.cmnuNewAction,
             this.toolStripMenuItem1,
-            this.normalizeToolStripMenuItem});
+            this.cmnuExportAction});
             this.cmsActions.Name = "cmsActions";
             this.cmsActions.Size = new System.Drawing.Size(146, 54);
-            // 
-            // cmnuNewAction
-            // 
-            this.cmnuNewAction.Name = "cmnuNewAction";
-            this.cmnuNewAction.Size = new System.Drawing.Size(145, 22);
-            this.cmnuNewAction.Text = "New Action...";
-            this.cmnuNewAction.Click += new System.EventHandler(this.Action_NewAction);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(142, 6);
             // 
-            // normalizeToolStripMenuItem
+            // cmnuExportAction
             // 
-            this.normalizeToolStripMenuItem.Name = "normalizeToolStripMenuItem";
-            this.normalizeToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
-            this.normalizeToolStripMenuItem.Text = "Normalize...";
+            this.cmnuExportAction.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.export;
+            this.cmnuExportAction.Name = "cmnuExportAction";
+            this.cmnuExportAction.Size = new System.Drawing.Size(145, 22);
+            this.cmnuExportAction.Text = "Export...";
             // 
             // cmsBoundingBox
             // 
@@ -513,12 +422,6 @@
             this.cmsBoundingBox.Size = new System.Drawing.Size(149, 26);
             this.cmsBoundingBox.Opening += new System.ComponentModel.CancelEventHandler(this.cmsBoundingBox_Opening);
             // 
-            // cmnuAddToAction
-            // 
-            this.cmnuAddToAction.Name = "cmnuAddToAction";
-            this.cmnuAddToAction.Size = new System.Drawing.Size(148, 22);
-            this.cmnuAddToAction.Text = "Add to Action";
-            // 
             // cmsActionSprite
             // 
             this.cmsActionSprite.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -527,7 +430,7 @@
             this.cmnuMoveDown,
             this.cmnuMoveBottom,
             this.toolStripMenuItem2,
-            this.cmnuDeleteAction});
+            this.cmnuDeleteActionFrame});
             this.cmsActionSprite.Name = "cmsAction";
             this.cmsActionSprite.Size = new System.Drawing.Size(162, 120);
             this.cmsActionSprite.Opening += new System.ComponentModel.CancelEventHandler(this.cmsAction_Opening);
@@ -565,31 +468,150 @@
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.Size = new System.Drawing.Size(158, 6);
             // 
-            // cmnuDeleteAction
-            // 
-            this.cmnuDeleteAction.Name = "cmnuDeleteAction";
-            this.cmnuDeleteAction.Size = new System.Drawing.Size(161, 22);
-            this.cmnuDeleteAction.Text = "Delete...";
-            this.cmnuDeleteAction.Click += new System.EventHandler(this.Action_DeleteActionFrameNode);
-            // 
             // cmsAction
             // 
             this.cmsAction.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.cmnuActionAnimate});
+            this.cmnuActionAnimate,
+            this.toolStripMenuItem5,
+            this.cmnuDeleteAction});
             this.cmsAction.Name = "cmsAction";
-            this.cmsAction.Size = new System.Drawing.Size(120, 26);
-            // 
-            // cmnuActionAnimate
-            // 
-            this.cmnuActionAnimate.Name = "cmnuActionAnimate";
-            this.cmnuActionAnimate.Size = new System.Drawing.Size(119, 22);
-            this.cmnuActionAnimate.Text = "Animate";
-            this.cmnuActionAnimate.Click += new System.EventHandler(this.Action_Animate);
+            this.cmsAction.Size = new System.Drawing.Size(120, 54);
             // 
             // animationExecutor
             // 
             this.animationExecutor.WorkerSupportsCancellation = true;
             this.animationExecutor.DoWork += new System.ComponentModel.DoWorkEventHandler(this.animationExecutor_DoWork);
+            // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(116, 6);
+            // 
+            // pictureBox
+            // 
+            this.pictureBox.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox.Name = "pictureBox";
+            this.pictureBox.Size = new System.Drawing.Size(100, 50);
+            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox.TabIndex = 0;
+            this.pictureBox.TabStop = false;
+            this.pictureBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox_MouseClick);
+            // 
+            // pbAnimation
+            // 
+            this.pbAnimation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbAnimation.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pbAnimation.Location = new System.Drawing.Point(12, 110);
+            this.pbAnimation.Name = "pbAnimation";
+            this.pbAnimation.Size = new System.Drawing.Size(170, 169);
+            this.pbAnimation.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbAnimation.TabIndex = 8;
+            this.pbAnimation.TabStop = false;
+            // 
+            // tbtnNewProject
+            // 
+            this.tbtnNewProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnNewProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.new_proj;
+            this.tbtnNewProject.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnNewProject.Name = "tbtnNewProject";
+            this.tbtnNewProject.Size = new System.Drawing.Size(23, 22);
+            this.tbtnNewProject.Text = "toolStripButton2";
+            this.tbtnNewProject.Click += new System.EventHandler(this.Action_NewProject);
+            // 
+            // tbtnOpenProject
+            // 
+            this.tbtnOpenProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnOpenProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.open_proj;
+            this.tbtnOpenProject.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnOpenProject.Name = "tbtnOpenProject";
+            this.tbtnOpenProject.Size = new System.Drawing.Size(23, 22);
+            this.tbtnOpenProject.Text = "Open Project";
+            this.tbtnOpenProject.Click += new System.EventHandler(this.Action_OpenProject);
+            // 
+            // tbtnSaveProject
+            // 
+            this.tbtnSaveProject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tbtnSaveProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.save_proj;
+            this.tbtnSaveProject.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tbtnSaveProject.Name = "tbtnSaveProject";
+            this.tbtnSaveProject.Size = new System.Drawing.Size(23, 22);
+            this.tbtnSaveProject.Text = "Save Project";
+            this.tbtnSaveProject.Click += new System.EventHandler(this.Action_SaveProject);
+            // 
+            // mnuNewProject
+            // 
+            this.mnuNewProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.new_proj;
+            this.mnuNewProject.Name = "mnuNewProject";
+            this.mnuNewProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.mnuNewProject.Size = new System.Drawing.Size(155, 22);
+            this.mnuNewProject.Text = "&New...";
+            this.mnuNewProject.Click += new System.EventHandler(this.Action_NewProject);
+            // 
+            // mnuOpenProject
+            // 
+            this.mnuOpenProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.open_proj;
+            this.mnuOpenProject.Name = "mnuOpenProject";
+            this.mnuOpenProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.mnuOpenProject.Size = new System.Drawing.Size(155, 22);
+            this.mnuOpenProject.Text = "&Open...";
+            this.mnuOpenProject.Click += new System.EventHandler(this.Action_OpenProject);
+            // 
+            // mnuSaveProject
+            // 
+            this.mnuSaveProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.save_proj;
+            this.mnuSaveProject.Name = "mnuSaveProject";
+            this.mnuSaveProject.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.mnuSaveProject.Size = new System.Drawing.Size(155, 22);
+            this.mnuSaveProject.Text = "&Save";
+            this.mnuSaveProject.Click += new System.EventHandler(this.Action_SaveProject);
+            // 
+            // mnuCloseProject
+            // 
+            this.mnuCloseProject.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.close_project;
+            this.mnuCloseProject.Name = "mnuCloseProject";
+            this.mnuCloseProject.Size = new System.Drawing.Size(155, 22);
+            this.mnuCloseProject.Text = "&Close";
+            this.mnuCloseProject.Click += new System.EventHandler(this.Action_CloseProject);
+            // 
+            // cmnuNewAction
+            // 
+            this.cmnuNewAction.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.add;
+            this.cmnuNewAction.Name = "cmnuNewAction";
+            this.cmnuNewAction.Size = new System.Drawing.Size(145, 22);
+            this.cmnuNewAction.Text = "New Action...";
+            this.cmnuNewAction.Click += new System.EventHandler(this.Action_NewAction);
+            // 
+            // cmnuAddToAction
+            // 
+            this.cmnuAddToAction.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.add;
+            this.cmnuAddToAction.Name = "cmnuAddToAction";
+            this.cmnuAddToAction.Size = new System.Drawing.Size(148, 22);
+            this.cmnuAddToAction.Text = "Add to Action";
+            // 
+            // cmnuDeleteActionFrame
+            // 
+            this.cmnuDeleteActionFrame.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.delete;
+            this.cmnuDeleteActionFrame.Name = "cmnuDeleteActionFrame";
+            this.cmnuDeleteActionFrame.Size = new System.Drawing.Size(161, 22);
+            this.cmnuDeleteActionFrame.Text = "Delete...";
+            this.cmnuDeleteActionFrame.Click += new System.EventHandler(this.Action_DeleteActionFrameNode);
+            // 
+            // cmnuActionAnimate
+            // 
+            this.cmnuActionAnimate.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.play;
+            this.cmnuActionAnimate.Name = "cmnuActionAnimate";
+            this.cmnuActionAnimate.Size = new System.Drawing.Size(119, 22);
+            this.cmnuActionAnimate.Text = "Animate";
+            this.cmnuActionAnimate.Click += new System.EventHandler(this.Action_Animate);
+            // 
+            // cmnuDeleteAction
+            // 
+            this.cmnuDeleteAction.Image = global::Ovow.Tools.SpriteSheetInspector.Properties.Resources.delete;
+            this.cmnuDeleteAction.Name = "cmnuDeleteAction";
+            this.cmnuDeleteAction.Size = new System.Drawing.Size(119, 22);
+            this.cmnuDeleteAction.Text = "Delete...";
             // 
             // FrmMain
             // 
@@ -600,6 +622,7 @@
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "FrmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -622,18 +645,18 @@
             this.splitContainer2.ResumeLayout(false);
             this.pnlMain.ResumeLayout(false);
             this.pnlMain.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.splitContainer4.Panel1.ResumeLayout(false);
             this.splitContainer4.Panel2.ResumeLayout(false);
             this.splitContainer4.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer4)).EndInit();
             this.splitContainer4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pbAnimation)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbFPS)).EndInit();
             this.cmsActions.ResumeLayout(false);
             this.cmsBoundingBox.ResumeLayout(false);
             this.cmsActionSprite.ResumeLayout(false);
             this.cmsAction.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbAnimation)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -661,7 +684,7 @@
         private System.Windows.Forms.ContextMenuStrip cmsActions;
         private System.Windows.Forms.ToolStripMenuItem cmnuNewAction;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem normalizeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cmnuExportAction;
         private System.Windows.Forms.ContextMenuStrip cmsBoundingBox;
         private System.Windows.Forms.ToolStripMenuItem cmnuAddToAction;
         private System.Windows.Forms.ContextMenuStrip cmsActionSprite;
@@ -670,7 +693,7 @@
         private System.Windows.Forms.ToolStripMenuItem cmnuMoveDown;
         private System.Windows.Forms.ToolStripMenuItem cmnuMoveBottom;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem cmnuDeleteAction;
+        private System.Windows.Forms.ToolStripMenuItem cmnuDeleteActionFrame;
         private System.Windows.Forms.ContextMenuStrip cmsAction;
         private System.Windows.Forms.ToolStripMenuItem cmnuActionAnimate;
         private System.ComponentModel.BackgroundWorker animationExecutor;
@@ -691,6 +714,8 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem mnuExit;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripMenuItem cmnuDeleteAction;
     }
 }
 
