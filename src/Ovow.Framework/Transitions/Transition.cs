@@ -31,6 +31,8 @@ namespace Ovow.Framework.Transitions
 
         public bool Ended { get; protected set; }
 
+        public bool IsActive { get; set; }
+
         public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         { }
 

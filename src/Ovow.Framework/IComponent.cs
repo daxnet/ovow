@@ -15,6 +15,8 @@ namespace Ovow.Framework
     {
         Guid Id { get; }
 
+        bool IsActive { get; set; }
+
         void Update(GameTime gameTime);
 
     }

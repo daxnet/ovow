@@ -25,9 +25,9 @@ namespace Ovow.Framework
 {
     public abstract class Component : IComponent
     {
-        private readonly Guid id = Guid.NewGuid();
+        public Guid Id { get; } = Guid.NewGuid();
 
-        public Guid Id => id;
+        public bool IsActive { get; set; } = true;
 
         public bool Equals(IComponent other)
         {
@@ -41,7 +41,7 @@ namespace Ovow.Framework
                 return false;
             }
 
-            return other.Id.Equals(this.id);
+            return other.Id.Equals(this.Id);
         }
 
         public abstract void Update(GameTime gameTime);
