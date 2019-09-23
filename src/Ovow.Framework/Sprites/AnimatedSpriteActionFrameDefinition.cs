@@ -18,32 +18,19 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-namespace Ovow.Tools.SpriteSheetInspector.Models
+namespace Ovow.Framework.Sprites
 {
-    public sealed class TreeNodePayload
+    /// <summary>
+    /// Represents a frame in an action definition.
+    /// </summary>
+    public sealed class AnimatedSpriteActionFrameDefinition
     {
-        public TreeNodePayload(TreeNodeType type, object data)
-        {
-            this.Type = type;
-            this.Data = data;
-        }
+        public int X { get; set; }
 
-        public TreeNodePayload(TreeNodeType type)
-            : this(type, null)
-        { }
+        public int Y { get; set; }
 
-        public TreeNodeType Type { get; set; }
+        public int Width { get; set; }
 
-        public object Data { get; set; }
-    }
-
-    public enum TreeNodeType
-    {
-        Root,
-        SpritesRoot,
-        ActionsRoot,
-        Sprite,
-        Action,
-        ActionFrame
+        public int Height { get; set; }
     }
 }
