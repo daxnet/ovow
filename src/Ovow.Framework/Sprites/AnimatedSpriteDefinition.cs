@@ -21,6 +21,7 @@ namespace Ovow.Framework.Sprites
 
         public List<AnimatedSpriteActionDefinition> Actions { get; set; }
 
+
         public static void Save(Stream stream, AnimatedSpriteDefinition definition)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(AnimatedSpriteDefinition));

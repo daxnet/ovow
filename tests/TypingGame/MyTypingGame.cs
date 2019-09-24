@@ -10,12 +10,8 @@ namespace TypingGame
     internal sealed class MyTypingGame : OvowGame
     {
         public MyTypingGame()
-            : base(new OvowGameWindowSettings
-            {
-                IsFullScreen = true
-            })
+            : base()
         {
-            
             Add<GameScene>();
         }
     }

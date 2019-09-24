@@ -28,7 +28,7 @@ namespace TypingGame
         private Sound hitSound;
         private Text diagText;
 
-        public GameScene(IOvowGame game) : base(game, Color.Black)
+        public GameScene(IOvowGame game) : base(game)
         {
             AutoRemoveInactiveComponents = true;
 
