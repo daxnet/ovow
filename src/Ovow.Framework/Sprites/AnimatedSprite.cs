@@ -20,6 +20,7 @@ namespace Ovow.Framework.Sprites
         private AnimatedSpriteActionDefinition actionDefinition;
         private int maxWidth;
         private int maxHeight;
+        private bool stop = false;
 
         public AnimatedSprite(IScene scene, Texture2D texture, Vector2 position, AnimatedSpriteDefinition definition, string action)
             : this(scene, texture, position, definition, action, 25)
@@ -56,25 +57,38 @@ namespace Ovow.Framework.Sprites
             }
         }
 
+        public void Stop() => stop = true;
+
         public override void Update(GameTime gameTime)
         {
-            elapsed += gameTime.ElapsedGameTime;
-            if (elapsed >= threshold)
+            if (!stop)
             {
-                currentFrameIndex = (currentFrameIndex + 1) % actionDefinition.Frames.Count;
-                elapsed = TimeSpan.Zero;
-            }
+                elapsed += gameTime.ElapsedGameTime;
+                if (elapsed >= threshold)
+                {
+                    currentFrameIndex = (currentFrameIndex + 1) % actionDefinition.Frames.Count;
+                    if (currentFrameIndex == 0)
+                    {
+                        Publish(new AnimationCompletedMessage(this));
+                    }
 
-            base.Update(gameTime);
+                    elapsed = TimeSpan.Zero;
+                }
+
+                base.Update(gameTime);
+            }
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            var curFrame = actionDefinition.Frames[currentFrameIndex];
-            var srcRect = new Rectangle(curFrame.X, curFrame.Y, curFrame.Width, curFrame.Height);
-            var destRect = new Rectangle((int)X + (maxWidth - curFrame.Width) / 2,
-                (int)Y + (maxHeight - curFrame.Height) / 2, curFrame.Width, curFrame.Height);
-            spriteBatch.Draw(Texture, destRect, srcRect, Color.White);
+            if (!stop)
+            {
+                var curFrame = actionDefinition.Frames[currentFrameIndex];
+                var srcRect = new Rectangle(curFrame.X, curFrame.Y, curFrame.Width, curFrame.Height);
+                var destRect = new Rectangle((int)X + (maxWidth - curFrame.Width) / 2,
+                    (int)Y + (maxHeight - curFrame.Height) / 2, curFrame.Width, curFrame.Height);
+                spriteBatch.Draw(Texture, destRect, srcRect, Color.White);
+            }
         }
     }
 }

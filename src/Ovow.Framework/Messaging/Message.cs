@@ -8,11 +8,8 @@ namespace Ovow.Framework.Messaging
 {
     public abstract class Message : IMessage
     {
-        private readonly Guid id = Guid.NewGuid();
-        private readonly DateTime timestamp = DateTime.UtcNow;
+        public Guid Id { get; } = Guid.NewGuid();
 
-        public Guid Id => id;
-
-        public DateTime Timestamp => timestamp;
+        public DateTime Timestamp { get; } = DateTime.UtcNow;
     }
 }

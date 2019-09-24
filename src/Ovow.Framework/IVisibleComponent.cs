@@ -18,5 +18,7 @@ namespace Ovow.Framework
         Texture2D Texture { get; }
 
         void Draw(GameTime gameTime, SpriteBatch spriteBatch);
+
+        bool CollisionDetective { get; }
     }
 }

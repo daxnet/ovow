@@ -6,6 +6,10 @@ using Ovow.Framework.Scenes;
 
 namespace Ovow.Framework.Services
 {
+    /// <summary>
+    /// Represents the service that detects whether two objects collides.
+    /// </summary>
+    /// <seealso cref="Ovow.Framework.Services.GameService" />
     public sealed class CollisionDetectionService : GameService
     {
         private static readonly CollisionDetector detector = new CollisionDetector();

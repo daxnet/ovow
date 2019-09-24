@@ -14,21 +14,28 @@ namespace Ovow.Framework.Services
 
         public bool Collides(IVisibleComponent a, IVisibleComponent b, out CollisionInfo ciA, out CollisionInfo ciB, bool byPixel = false)
         {
-            var widthMe = a.Texture.Width;
-            var heightMe = a.Texture.Height;
-            var widthOther = b.Texture.Width;
-            var heightOther = b.Texture.Height;
-
-            if (byPixel &&                                // if we need per pixel
-                ((Math.Min(widthOther, heightOther) > 128) ||  // at least avoid doing it
-                (Math.Min(widthMe, heightMe) > 128)))          // for small sizes (nobody will notice :P)
+            if (a.CollisionDetective && b.CollisionDetective)
             {
-                return SimpleIntersects(a.BoundingBox, b.BoundingBox, out ciA, out ciB)
-                    && PerPixelCollision(a, b);
+                var widthMe = a.Texture.Width;
+                var heightMe = a.Texture.Height;
+                var widthOther = b.Texture.Width;
+                var heightOther = b.Texture.Height;
+
+                if (byPixel &&                                // if we need per pixel
+                    ((Math.Min(widthOther, heightOther) > 128) ||  // at least avoid doing it
+                    (Math.Min(widthMe, heightMe) > 128)))          // for small sizes (nobody will notice :P)
+                {
+                    return SimpleIntersects(a.BoundingBox, b.BoundingBox, out ciA, out ciB)
+                        && PerPixelCollision(a, b);
+                }
+
+
+                return SimpleIntersects(a.BoundingBox, b.BoundingBox, out ciA, out ciB);
             }
 
-
-            return SimpleIntersects(a.BoundingBox, b.BoundingBox, out ciA, out ciB);
+            ciA = CollisionInfo.Empty;
+            ciB = CollisionInfo.Empty;
+            return false;
         }
 
         private static bool SimpleIntersects(Rectangle a, Rectangle b, out CollisionInfo ciA, out CollisionInfo ciB)

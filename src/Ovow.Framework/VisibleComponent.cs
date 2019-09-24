@@ -42,6 +42,7 @@ namespace Ovow.Framework
             this.Texture = texture;
             this.X = position.X;
             this.Y = position.Y;
+            CollisionDetective = true;
         }
 
         public Texture2D Texture { get; }
@@ -77,6 +78,8 @@ namespace Ovow.Framework
         }
 
         public Rectangle BoundingBox => new Rectangle((int)X, (int)Y, Width, Height);
+
+        public virtual bool CollisionDetective { get; set; }
 
         public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
 

@@ -69,6 +69,7 @@
     <Compile Include="Sprites\AnimatedSpriteActionDefinition.cs" />
     <Compile Include="Sprites\AnimatedSpriteActionFrameDefinition.cs" />
     <Compile Include="Sprites\AnimatedSpriteDefinition.cs" />
+    <Compile Include="Sprites\AnimationCompletedMessage.cs" />
     <Compile Include="Sprites\SpriteSheet.cs" />
     <Compile Include="Transitions\DelayTransition.cs" />
     <Compile Include="Transitions\ITransition.cs" />

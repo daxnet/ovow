@@ -77,6 +77,8 @@ namespace Ovow.Framework.Scenes
         public ITransition Out { get; protected set; }
         public bool IsActive { get; set; }
 
+        public bool CollisionDetective => false;
+
         public void Add(IComponent item)
         {
             gameComponents.Add(item);

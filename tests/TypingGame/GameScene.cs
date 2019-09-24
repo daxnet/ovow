@@ -11,6 +11,7 @@ using Ovow.Framework.Sounds;
 using Ovow.Framework.Sprites;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace TypingGame
@@ -23,10 +24,12 @@ namespace TypingGame
         private TimeSpan letterGenerationTimeSpanThreshold = TimeSpan.FromMilliseconds(1000);
         private readonly Dictionary<char, Texture2D> lettersTextureDict = new Dictionary<char, Texture2D>();
         private Texture2D laserTexture;
+        private Texture2D explosionTexture;
         private SpriteFont diagTextFont;
         private SoundEffect hitSoundEffect;
         private Sound hitSound;
         private Text diagText;
+        private AnimatedSpriteDefinition explosionDefinition;
 
         public GameScene(IOvowGame game) : base(game)
         {
@@ -34,12 +37,14 @@ namespace TypingGame
 
             Subscribe<ReachBoundaryMessage>((sender, message) =>
             {
-                if (sender is LetterSprite letterSprite && message.ReachedBoundary == Boundary.Bottom)
+                if (sender is LetterSprite letterSprite && 
+                    message.ReachedBoundary == Boundary.Bottom)
                 {
                     letterSprite.IsActive = false;
                 }
 
-                if (sender is LaserSprite laserSprite && message.ReachedBoundary == Boundary.Top)
+                if (sender is LaserSprite laserSprite && 
+                    message.ReachedBoundary == Boundary.Top)
                 {
                     laserSprite.IsActive = false;
                 }
@@ -52,15 +57,39 @@ namespace TypingGame
                     letterSprite.Letter == laserSprite.Letter &&
                     letterSprite.IsActive && laserSprite.IsActive)
                 {
+                    var letterSpriteX = letterSprite.X;
+                    var letterSpriteY = letterSprite.Y;
                     hitSound.Play();
                     letterSprite.IsActive = false;
                     laserSprite.IsActive = false;
+
+                    var explosionSprite = new AnimatedSprite(this,
+                        explosionTexture,
+                        new Vector2(letterSpriteX, letterSpriteY),
+                        explosionDefinition,
+                        "explosion", 400)
+                    {
+                        CollisionDetective = false
+                    };
+
+                    Add(explosionSprite);
                 }
+            });
+
+            Subscribe<AnimationCompletedMessage>((sender, message) =>
+            {
+                message.Sprite.Stop();
+                message.Sprite.IsActive = false;
             });
         }
 
         public override void Load(ContentManager contentManager)
         {
+            using (var fs = new FileStream("explosion.xml", FileMode.Open, FileAccess.Read))
+            {
+                explosionDefinition = AnimatedSpriteDefinition.Load(fs);
+            }
+
             // Loads texture for letters.
             for (char i = 'A'; i <= 'Z'; i++)
             {
@@ -70,9 +99,12 @@ namespace TypingGame
             // Loads texture for laser.
             laserTexture = contentManager.Load<Texture2D>("Laser");
 
+            // Loads texture for explosion.
+            explosionTexture = contentManager.Load<Texture2D>("explosion2");
+
             // Loads font textures.
             diagTextFont = contentManager.Load<SpriteFont>("diagText");
-            diagText = new Text(string.Format(DiagTextPattern, this.Count), this, diagTextFont);
+            diagText = new Text(string.Format(DiagTextPattern, this.Count), this, diagTextFont) { CollisionDetective = false };
             this.Add(diagText);
 
             // Loads the Hit Sound.
