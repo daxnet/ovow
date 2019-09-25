@@ -1,27 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ----------------------------------------------------------------------------
+//   ____                    ____                                   __
+//  / __ \_  _____ _    __  / __/______ ___ _  ___ _    _____  ____/ /__
+// / /_/ / |/ / _ \ |/|/ / / _// __/ _ `/  ' \/ -_) |/|/ / _ \/ __/  '_/
+// \____/|___/\___/__,__/ /_/ /_/  \_,_/_/_/_/\__/|__,__/\___/_/ /_/\_\
+//
+// A 2D gaming framework on MonoGame
+//
+// Copyright (C) 2019 by daxnet.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//    http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ----------------------------------------------------------------------------
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 
 namespace Ovow.Framework.Sounds
 {
+    /// <summary>
+    /// Represents a sound effect in the game.
+    /// </summary>
+    /// <seealso cref="Ovow.Framework.Component" />
     public sealed class Sound : Component
     {
-        private readonly float volume;
+        #region Private Fields
+
         private readonly SoundEffect soundEffect;
+        private readonly float volume;
         private SoundEffectInstance soundEffectInstance;
 
+        #endregion Private Fields
+
+        #region Public Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Sound"/> class.
+        /// </summary>
+        /// <param name="soundEffect">The sound effect asset for playing the sound.</param>
+        /// <param name="volume">The volume of the sound.</param>
         public Sound(SoundEffect soundEffect, float volume = 1.0F)
         {
             this.soundEffect = soundEffect;
             this.volume = volume;
         }
 
-        public override void Update(GameTime gameTime) { }
+        #endregion Public Constructors
 
+        #region Public Methods
+
+        /// <summary>
+        /// Plays the sound.
+        /// </summary>
         public void Play()
         {
             Stop();
@@ -31,6 +66,9 @@ namespace Ovow.Framework.Sounds
             soundEffectInstance.Play();
         }
 
+        /// <summary>
+        /// Stops playing the sound.
+        /// </summary>
         public void Stop()
         {
             if (soundEffectInstance != null &&
@@ -40,5 +78,11 @@ namespace Ovow.Framework.Sounds
                 soundEffectInstance.Dispose();
             }
         }
+
+        public override void Update(GameTime gameTime)
+        {
+        }
+
+        #endregion Public Methods
     }
 }

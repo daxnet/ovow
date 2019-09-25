@@ -18,18 +18,31 @@ namespace TypingGame
 {
     internal sealed class GameScene : Scene
     {
+        #region Private Fields
+
         private const string DiagTextPattern = @"[TOTAL OBJECTS] {0}";
         private static readonly Random rnd = new Random(DateTime.Now.Millisecond);
+        private readonly List<SoundEffect> bgmMusicEffects = new List<SoundEffect>();
+        private readonly Dictionary<char, Texture2D> lettersTextureDict = new Dictionary<char, Texture2D>();
+        private BackgroundMusic bgm;
+        private Texture2D cloudTexture;
+        private Text diagText;
+        private SpriteFont diagTextFont;
+        private bool disposed;
+        private Sound explodeSound;
+        private SoundEffect explodeSoundEffect;
+        private AnimatedSpriteDefinition explosionDefinition;
+        private Texture2D explosionTexture;
+        private Texture2D grassTexture;
+        private Texture2D laserTexture;
         private TimeSpan letterGenerationTimeSpan = TimeSpan.Zero;
         private TimeSpan letterGenerationTimeSpanThreshold = TimeSpan.FromMilliseconds(1000);
-        private readonly Dictionary<char, Texture2D> lettersTextureDict = new Dictionary<char, Texture2D>();
-        private Texture2D laserTexture;
-        private Texture2D explosionTexture;
-        private SpriteFont diagTextFont;
-        private SoundEffect hitSoundEffect;
-        private Sound hitSound;
-        private Text diagText;
-        private AnimatedSpriteDefinition explosionDefinition;
+        private Texture2D sunTexture;
+        private Texture2D treeTexture;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public GameScene(IOvowGame game) : base(game)
         {
@@ -59,7 +72,7 @@ namespace TypingGame
                 {
                     var letterSpriteX = letterSprite.X;
                     var letterSpriteY = letterSprite.Y;
-                    hitSound.Play();
+                    explodeSound.Play();
                     letterSprite.IsActive = false;
                     laserSprite.IsActive = false;
 
@@ -83,12 +96,44 @@ namespace TypingGame
             });
         }
 
+        #endregion Public Constructors
+
+        #region Private Properties
+
+        private IEnumerable<LaserSprite> LaserSprites =>
+            from p in this where p is LaserSprite select p as LaserSprite;
+
+        private IEnumerable<LetterSprite> LetterSprites =>
+            from p in this where p is LetterSprite select p as LetterSprite;
+
+        #endregion Private Properties
+
+        #region Public Methods
+
         public override void Load(ContentManager contentManager)
         {
             using (var fs = new FileStream("explosion.xml", FileMode.Open, FileAccess.Read))
             {
                 explosionDefinition = AnimatedSpriteDefinition.Load(fs);
             }
+
+            // Loads texture for background elements.
+            sunTexture = contentManager.Load<Texture2D>("sun");
+            cloudTexture = contentManager.Load<Texture2D>("cloud");
+            treeTexture = contentManager.Load<Texture2D>("tree");
+            grassTexture = contentManager.Load<Texture2D>("grass");
+
+            var sunSprite = new DumbSprite(this, sunTexture, new Vector2(10, 10));
+            Add(sunSprite);
+
+            var cloudSprite = new DumbSprite(this, cloudTexture, new Vector2(ViewportWidth - cloudTexture.Width - 50, 50));
+            Add(cloudSprite);
+
+            var grassSprite = new DumbSprite(this, grassTexture, new Vector2(0, ViewportHeight - grassTexture.Height));
+            Add(grassSprite);
+
+            var treeSprite = new DumbSprite(this, treeTexture, new Vector2(ViewportWidth - treeTexture.Width - 30, ViewportHeight - treeTexture.Height - 100));
+            Add(treeSprite);
 
             // Loads texture for letters.
             for (char i = 'A'; i <= 'Z'; i++)
@@ -108,9 +153,19 @@ namespace TypingGame
             this.Add(diagText);
 
             // Loads the Hit Sound.
-            hitSoundEffect = contentManager.Load<SoundEffect>("typing");
-            hitSound = new Sound(hitSoundEffect);
-            this.Add(hitSound);
+            explodeSoundEffect = contentManager.Load<SoundEffect>("explode");
+            explodeSound = new Sound(explodeSoundEffect, 0.5F);
+            this.Add(explodeSound);
+
+            // Loads the BGM.
+            for (var idx = 1; idx <= 2; idx++)
+            {
+                bgmMusicEffects.Add(contentManager.Load<SoundEffect>($"bgm{idx}"));
+            }
+
+            bgm = new BackgroundMusic(bgmMusicEffects, 0.2F);
+            bgm.Play();
+            Add(bgm);
 
             // Add game services.
             this.Add(new CollisionDetectionService(this));
@@ -183,7 +238,9 @@ namespace TypingGame
             base.Update(gameTime);
         }
 
-        private bool disposed;
+        #endregion Public Methods
+
+        #region Protected Methods
 
         protected override void Dispose(bool disposing)
         {
@@ -191,15 +248,27 @@ namespace TypingGame
             {
                 if (disposing)
                 {
-                    foreach(var kvp in lettersTextureDict)
+                    foreach (var kvp in lettersTextureDict)
                     {
                         kvp.Value.Dispose();
                     }
 
                     laserTexture.Dispose();
+                    treeTexture.Dispose();
+                    cloudTexture.Dispose();
+                    sunTexture.Dispose();
+                    grassTexture.Dispose();
                     diagTextFont.Texture.Dispose();
-                    hitSound.Stop();
-                    hitSoundEffect.Dispose();
+                    explodeSound.Stop();
+                    explodeSoundEffect.Dispose();
+                    bgm.Stop();
+                    foreach (var musicEffect in bgmMusicEffects)
+                    {
+                        if (!musicEffect.IsDisposed)
+                        {
+                            musicEffect.Dispose();
+                        }
+                    }
                 }
 
                 disposed = true;
@@ -208,10 +277,6 @@ namespace TypingGame
             base.Dispose(disposing);
         }
 
-        private IEnumerable<LetterSprite> LetterSprites =>
-            from p in this where p is LetterSprite select p as LetterSprite;
-
-        private IEnumerable<LaserSprite> LaserSprites =>
-            from p in this where p is LaserSprite select p as LaserSprite;
+        #endregion Protected Methods
     }
 }
