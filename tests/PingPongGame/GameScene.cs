@@ -13,7 +13,7 @@ namespace PingPongGame
 {
     internal sealed class GameScene : Scene
     {
-        private const int NumOfBalls = 10;
+        private const int NumOfBalls = 5;
         private const int MaxDelta = 15;
 
         // private int times = 0;
