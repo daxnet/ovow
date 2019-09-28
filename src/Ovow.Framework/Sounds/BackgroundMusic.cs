@@ -20,6 +20,7 @@
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,6 +40,8 @@ namespace Ovow.Framework.Sounds
         private bool looped;
         private SoundEffectInstance musicEffectInstance;
         private bool stopped = true;
+        private readonly TimeSpan soundStatusCheckInterval = TimeSpan.FromSeconds(5);
+        private TimeSpan elapsedGameTime;
 
         #endregion Private Fields
 
@@ -86,16 +89,21 @@ namespace Ovow.Framework.Sounds
         {
             if (!stopped)
             {
-                if (musicEffectInstance.State == SoundState.Stopped)
+                elapsedGameTime += gameTime.ElapsedGameTime;
+                if (elapsedGameTime >= soundStatusCheckInterval)
                 {
-                    currentIndex = (currentIndex + 1) % musicEffects.Length;
-                    if (currentIndex == 0 && !looped)
+                    if (musicEffectInstance.State == SoundState.Stopped)
                     {
-                        Stop();
-                        return;
-                    }
+                        currentIndex = (currentIndex + 1) % musicEffects.Length;
+                        if (currentIndex == 0 && !looped)
+                        {
+                            Stop();
+                            return;
+                        }
 
-                    Play(currentIndex);
+                        Play(currentIndex);
+                    }
+                    elapsedGameTime = TimeSpan.Zero;
                 }
             }
         }

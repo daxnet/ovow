@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ovow.Tools.SpriteSheetInspe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ovow.Tools.Common", "tools\Ovow.Tools.Common\Ovow.Tools.Common.csproj", "{6A3C3C52-3183-4CDF-85DE-AEEC8BA1581C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypingGame", "tests\TypingGame\TypingGame.csproj", "{C573E54E-E4DD-40FC-9EB6-F3E4DA1B804E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,12 +57,6 @@ Global
 		{6A3C3C52-3183-4CDF-85DE-AEEC8BA1581C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6A3C3C52-3183-4CDF-85DE-AEEC8BA1581C}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A3C3C52-3183-4CDF-85DE-AEEC8BA1581C}.Release|x86.Build.0 = Release|Any CPU
-		{C573E54E-E4DD-40FC-9EB6-F3E4DA1B804E}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{C573E54E-E4DD-40FC-9EB6-F3E4DA1B804E}.Debug|x86.ActiveCfg = Debug|x86
-		{C573E54E-E4DD-40FC-9EB6-F3E4DA1B804E}.Debug|x86.Build.0 = Debug|x86
-		{C573E54E-E4DD-40FC-9EB6-F3E4DA1B804E}.Release|Any CPU.ActiveCfg = Release|x86
-		{C573E54E-E4DD-40FC-9EB6-F3E4DA1B804E}.Release|x86.ActiveCfg = Release|x86
-		{C573E54E-E4DD-40FC-9EB6-F3E4DA1B804E}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,7 +66,6 @@ Global
 		{7C6D79BD-B1A4-44FD-837A-EEB1EE8FF824} = {861C3724-2910-43FF-9557-7571790D1A36}
 		{AF3CBE86-3EA5-46C3-B944-DB7B86A27E0B} = {B314459F-B1E4-43EB-8B99-AE4022180D8D}
 		{6A3C3C52-3183-4CDF-85DE-AEEC8BA1581C} = {B314459F-B1E4-43EB-8B99-AE4022180D8D}
-		{C573E54E-E4DD-40FC-9EB6-F3E4DA1B804E} = {861C3724-2910-43FF-9557-7571790D1A36}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {012781C3-AE4B-4323-8337-C828559993DB}
