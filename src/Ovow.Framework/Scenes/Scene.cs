@@ -16,7 +16,10 @@ namespace Ovow.Framework.Scenes
         private readonly List<IComponent> gameComponents = new List<IComponent>();
         private volatile bool ended = false;
         private volatile bool ending = false;
+        private bool removing = false;
         private static readonly object endingSyncLock = new object();
+        //private static readonly TimeSpan removeComponentsInterval = TimeSpan.FromSeconds(5);
+        //private TimeSpan removeComponentsTime = TimeSpan.Zero;
 
         protected Scene(IOvowGame game)
             : this(game, null, Color.CornflowerBlue)
@@ -94,11 +97,14 @@ namespace Ovow.Framework.Scenes
         {
             this.Game.GraphicsDevice.Clear(BackgroundColor);
 
-            gameComponents
-                .Where(c => c is IVisibleComponent)
-                .Select(c => c as IVisibleComponent)
-                .ToList()
-                .ForEach(vc => vc.Draw(gameTime, spriteBatch));
+            if (!removing)
+            {
+                gameComponents
+                    .Where(c => c is IVisibleComponent)
+                    .Select(c => c as IVisibleComponent)
+                    .ToList()
+                    .ForEach(vc => vc.Draw(gameTime, spriteBatch));
+            }
 
             if (this.ending && !this.ended && this.Out != null)
             {
@@ -167,14 +173,19 @@ namespace Ovow.Framework.Scenes
 
         public virtual void Update(GameTime gameTime)
         {
-            if (AutoRemoveInactiveComponents)
+            (from comp in gameComponents where comp.IsActive select comp)
+                .AsParallel()
+                .ForAll(c => c.Update(gameTime));
+
+            try
             {
+                removing = true;
                 gameComponents.RemoveAll(c => !c.IsActive);
             }
-
-            gameComponents
-                .ToList()
-                .ForEach(c => c.Update(gameTime));
+            finally
+            {
+                removing = false;
+            }
 
             if (ending && !ended && this.Out != null)
             {
@@ -210,6 +221,10 @@ namespace Ovow.Framework.Scenes
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        public virtual void Enter() { }
+
+        public virtual void Leave() { }
         #endregion
 
     }

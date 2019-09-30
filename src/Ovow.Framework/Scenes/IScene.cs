@@ -21,6 +21,10 @@ namespace Ovow.Framework.Scenes
 
         Color BackgroundColor { get;}
 
+        void Enter();
+
+        void Leave();
+
         void End();
 
         bool Ended { get; }

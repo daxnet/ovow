@@ -33,14 +33,25 @@ namespace Ovow.Framework
 {
     public class OvowGame : Game, IOvowGame
     {
-        private static readonly object sync = new object();
-        private readonly GraphicsDeviceManager graphicsDeviceManager;
-        private readonly OvowGameWindowSettings windowSettings;
-        private readonly IMessageDispatcher messageDispatcher = new MessageDispatcher();
-        private readonly List<IScene> scenes = new List<IScene>();
-        private int sceneIndex = 0;
+        #region Protected Fields
 
         protected SpriteBatch spriteBatch;
+
+        #endregion Protected Fields
+
+        #region Private Fields
+
+        private static readonly object sync = new object();
+        private readonly GraphicsDeviceManager graphicsDeviceManager;
+        private readonly IMessageDispatcher messageDispatcher = new MessageDispatcher();
+        private readonly List<IScene> scenes = new List<IScene>();
+        private readonly OvowGameWindowSettings windowSettings;
+        private bool disposed = false;
+        private int sceneIndex = 0;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public OvowGame()
             : this(OvowGameWindowSettings.NormalScreenShowMouse)
@@ -60,16 +71,101 @@ namespace Ovow.Framework
                     {
                         if (message.Scene == this.scenes[sceneIndex])
                         {
+                            ActiveScene?.Leave();
+
                             sceneIndex++;
 
                             if (sceneIndex == scenes.Count)
                             {
                                 Exit();
+                                return;
                             }
+
+                            ActiveScene?.Enter();
                         }
                     }
                 }
             });
+        }
+
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public IScene ActiveScene
+        {
+            get
+            {
+                if (sceneIndex >= scenes.Count)
+                {
+                    return null;
+                }
+
+                return scenes[sceneIndex];
+            }
+        }
+
+        public int Count => scenes.Count;
+
+        public bool IsReadOnly => false;
+
+        public IMessageDispatcher MessageDispatcher => messageDispatcher;
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public void Add(IScene item) => scenes.Add(item);
+
+        /// <summary>
+        /// Removes all items from the <see cref="T:System.Collections.Generic.ICollection`1" />.
+        /// </summary>
+        public void Clear() => scenes.Clear();
+
+        public bool Contains(IScene item) => scenes.Contains(item);
+
+        public void CopyTo(IScene[] array, int arrayIndex) => scenes.CopyTo(array, arrayIndex);
+
+        public IEnumerator<IScene> GetEnumerator() => scenes.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => scenes.GetEnumerator();
+
+        public bool Remove(IScene item) => scenes.Remove(item);
+
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected void Add<TScene>()
+            where TScene : Scene
+            => Add((TScene)Activator.CreateInstance(typeof(TScene), this));
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    foreach (var scene in scenes)
+                    {
+                        scene.Dispose();
+                    }
+                }
+
+                base.Dispose(disposing);
+                disposed = true;
+            }
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            this.spriteBatch.Begin();
+
+            ActiveScene?.Draw(gameTime, this.spriteBatch);
+
+            this.spriteBatch.End();
+
+            base.Draw(gameTime);
         }
 
         protected override void Initialize()
@@ -99,6 +195,8 @@ namespace Ovow.Framework
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             this.scenes.ForEach(scene => scene.Load(Content));
+
+            ActiveScene?.Enter();
         }
 
         protected override void Update(GameTime gameTime)
@@ -108,74 +206,6 @@ namespace Ovow.Framework
             base.Update(gameTime);
         }
 
-        protected override void Draw(GameTime gameTime)
-        {
-            this.spriteBatch.Begin();
-
-            ActiveScene?.Draw(gameTime, this.spriteBatch);
-
-            this.spriteBatch.End();
-
-            base.Draw(gameTime);
-        }
-
-        public void Add(IScene item) => scenes.Add(item);
-
-        protected void Add<TScene>()
-            where TScene : Scene
-            => Add((TScene)Activator.CreateInstance(typeof(TScene), this));
-
-        /// <summary>
-        /// Removes all items from the <see cref="T:System.Collections.Generic.ICollection`1" />.
-        /// </summary>
-        public void Clear() => scenes.Clear();
-
-        public bool Contains(IScene item) => scenes.Contains(item);
-
-        public void CopyTo(IScene[] array, int arrayIndex) => scenes.CopyTo(array, arrayIndex);
-
-        public bool Remove(IScene item) => scenes.Remove(item);
-
-        public IEnumerator<IScene> GetEnumerator() => scenes.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => scenes.GetEnumerator();
-
-        public IMessageDispatcher MessageDispatcher => messageDispatcher;
-
-        public int Count => scenes.Count;
-
-        public bool IsReadOnly => false;
-
-        public IScene ActiveScene
-        {
-            get
-            {
-                if (sceneIndex >= scenes.Count)
-                {
-                    return null;
-                }
-
-                return scenes[sceneIndex];
-            }
-        }
-
-        private bool disposed = false;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    foreach(var scene in scenes)
-                    {
-                        scene.Dispose();
-                    }
-                }
-
-                base.Dispose(disposing);
-                disposed = true;
-            }
-        }
+        #endregion Protected Methods
     }
 }
