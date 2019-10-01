@@ -15,9 +15,11 @@ namespace Ovow.Framework
     /// </summary>
     /// <seealso cref="System.Collections.Generic.ICollection{Ovow.Framework.Scenes.IScene}" />
     /// <seealso cref="System.IDisposable" />
-    public interface IOvowGame : ICollection<IScene>, IDisposable
+    public interface IOvowGame : IDisposable
     {
         IScene ActiveScene { get; }
+
+        IScene GetSceneByName(string sceneName);
 
         IMessageDispatcher MessageDispatcher { get; }
 

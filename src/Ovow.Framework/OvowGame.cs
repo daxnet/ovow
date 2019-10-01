@@ -20,14 +20,11 @@
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Ovow.Framework.Messaging;
 using Ovow.Framework.Messaging.GeneralMessages;
 using Ovow.Framework.Scenes;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Ovow.Framework
 {
@@ -43,11 +40,12 @@ namespace Ovow.Framework
 
         private static readonly object sync = new object();
         private readonly GraphicsDeviceManager graphicsDeviceManager;
-        private readonly IMessageDispatcher messageDispatcher = new MessageDispatcher();
-        private readonly List<IScene> scenes = new List<IScene>();
+        // private readonly List<IScene> scenes = new List<IScene>();
+        private readonly Dictionary<string, IScene> scenes = new Dictionary<string, IScene>();
         private readonly OvowGameWindowSettings windowSettings;
         private bool disposed = false;
-        private int sceneIndex = 0;
+
+        // private int sceneIndex = 0;
 
         #endregion Private Fields
 
@@ -63,27 +61,21 @@ namespace Ovow.Framework
             this.windowSettings = windowSettings;
             Content.RootDirectory = "Content";
 
-            this.messageDispatcher.RegisterHandler<SceneEndedMessage>((publisher, message) =>
+            this.MessageDispatcher.RegisterHandler<SceneEndedMessage>((publisher, message) =>
             {
-                if (message.Scene == this.scenes[sceneIndex])
+                lock (sync)
                 {
-                    lock (sync)
+                    ActiveScene?.Leave();
+
+                    ActiveScene = ActiveScene.Next;
+
+                    if (ActiveScene == null)
                     {
-                        if (message.Scene == this.scenes[sceneIndex])
-                        {
-                            ActiveScene?.Leave();
-
-                            sceneIndex++;
-
-                            if (sceneIndex == scenes.Count)
-                            {
-                                Exit();
-                                return;
-                            }
-
-                            ActiveScene?.Enter();
-                        }
+                        Exit();
+                        return;
                     }
+
+                    ActiveScene?.Enter();
                 }
             });
         }
@@ -92,53 +84,42 @@ namespace Ovow.Framework
 
         #region Public Properties
 
-        public IScene ActiveScene
-        {
-            get
-            {
-                if (sceneIndex >= scenes.Count)
-                {
-                    return null;
-                }
-
-                return scenes[sceneIndex];
-            }
-        }
+        public IScene ActiveScene { get; set; }
 
         public int Count => scenes.Count;
 
         public bool IsReadOnly => false;
 
-        public IMessageDispatcher MessageDispatcher => messageDispatcher;
+        public IMessageDispatcher MessageDispatcher { get; } = new MessageDispatcher();
 
         #endregion Public Properties
 
         #region Public Methods
 
-        public void Add(IScene item) => scenes.Add(item);
+        public void AddScene(string name, IScene item, bool isEntryScene = false)
+        {
+            if (isEntryScene)
+            {
+                if (ActiveScene == null)
+                {
+                    ActiveScene = item;
+                }
+                else
+                {
+                    throw new InvalidOperationException("There is already a scene that is marked as the entry scene.");
+                }
+            }
 
-        /// <summary>
-        /// Removes all items from the <see cref="T:System.Collections.Generic.ICollection`1" />.
-        /// </summary>
-        public void Clear() => scenes.Clear();
-
-        public bool Contains(IScene item) => scenes.Contains(item);
-
-        public void CopyTo(IScene[] array, int arrayIndex) => scenes.CopyTo(array, arrayIndex);
-
-        public IEnumerator<IScene> GetEnumerator() => scenes.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => scenes.GetEnumerator();
-
-        public bool Remove(IScene item) => scenes.Remove(item);
+            this.scenes.Add(name, item);
+        }
 
         #endregion Public Methods
 
         #region Protected Methods
 
-        protected void Add<TScene>()
+        protected void AddScene<TScene>(string name, bool isEntryScene = false)
             where TScene : Scene
-            => Add((TScene)Activator.CreateInstance(typeof(TScene), this));
+            => AddScene(name, (TScene)Activator.CreateInstance(typeof(TScene), this), isEntryScene);
 
         protected override void Dispose(bool disposing)
         {
@@ -146,9 +127,9 @@ namespace Ovow.Framework
             {
                 if (disposing)
                 {
-                    foreach (var scene in scenes)
+                    foreach (var kvp in scenes)
                     {
-                        scene.Dispose();
+                        kvp.Value.Dispose();
                     }
                 }
 
@@ -170,6 +151,11 @@ namespace Ovow.Framework
 
         protected override void Initialize()
         {
+            if (this.scenes?.Count == 0 || this.ActiveScene == null)
+            {
+                throw new InvalidOperationException("No active scene has been defined.");
+            }
+
             graphicsDeviceManager.IsFullScreen = this.windowSettings.IsFullScreen;
             if (!this.windowSettings.IsFullScreen)
             {
@@ -194,7 +180,10 @@ namespace Ovow.Framework
             base.LoadContent();
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            this.scenes.ForEach(scene => scene.Load(Content));
+            foreach(var kvp in this.scenes)
+            {
+                kvp.Value.Load(Content);
+            }
 
             ActiveScene?.Enter();
         }
@@ -205,6 +194,8 @@ namespace Ovow.Framework
 
             base.Update(gameTime);
         }
+
+        public IScene GetSceneByName(string sceneName) => scenes[sceneName];
 
         #endregion Protected Methods
     }

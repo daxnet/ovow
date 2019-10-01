@@ -13,13 +13,17 @@ namespace Ovow.Framework.Scenes
 {
     public abstract class Scene : IScene
     {
+        #region Private Fields
+
+        private static readonly object endingSyncLock = new object();
         private readonly List<IComponent> gameComponents = new List<IComponent>();
         private volatile bool ended = false;
         private volatile bool ending = false;
         private bool removing = false;
-        private static readonly object endingSyncLock = new object();
-        //private static readonly TimeSpan removeComponentsInterval = TimeSpan.FromSeconds(5);
-        //private TimeSpan removeComponentsTime = TimeSpan.Zero;
+
+        #endregion Private Fields
+
+        #region Protected Constructors
 
         protected Scene(IOvowGame game)
             : this(game, null, Color.CornflowerBlue)
@@ -43,44 +47,60 @@ namespace Ovow.Framework.Scenes
             AutoRemoveInactiveComponents = true;
         }
 
+        #endregion Protected Constructors
+
+        #region Private Destructors
+
+        ~Scene()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
+        }
+
+        #endregion Private Destructors
+
+        #region Public Properties
+
         public bool AutoRemoveInactiveComponents { get; protected set; }
+
+        public Color BackgroundColor { get; }
+        public Rectangle BoundingBox => new Rectangle((int)OffsetX, (int)OffsetX, Width, Height);
+        public bool CollisionDetective => false;
+        public int Count => gameComponents.Count;
+        public bool Ended => ended;
+        public IOvowGame Game { get; }
+        public int Height => Texture == null ? 0 : Texture.Height;
+        public Guid Id { get; } = Guid.NewGuid();
+        public ITransition In { get; protected set; }
+        public bool IsActive { get; set; }
+        public bool IsReadOnly => false;
+        public IScene Next
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(NextSceneName))
+                {
+                    return null;
+                }
+
+                return Game.GetSceneByName(NextSceneName);
+            }
+        }
 
         public float OffsetX { get; set; }
 
         public float OffsetY { get; set; }
 
+        public ITransition Out { get; protected set; }
+        public Vector2 Position => new Vector2(OffsetX, OffsetY);
+        public Texture2D Texture { get; }
+        public int ViewportHeight => Game.GraphicsDevice.Viewport.Height;
+        public int ViewportWidth => Game.GraphicsDevice.Viewport.Width;
         public int Width => Texture == null ? 0 : Texture.Width;
 
-        public int Height => Texture == null ? 0 : Texture.Height;
+        #endregion Public Properties
 
-        public int Count => gameComponents.Count;
-
-        public bool IsReadOnly => false;
-
-        public bool Ended => ended;
-
-        public Color BackgroundColor { get; }
-
-        public IOvowGame Game { get; }
-
-        public int ViewportWidth => Game.GraphicsDevice.Viewport.Width;
-
-        public int ViewportHeight => Game.GraphicsDevice.Viewport.Height;
-
-        public Rectangle BoundingBox => new Rectangle((int)OffsetX, (int)OffsetX, Width, Height);
-
-        public Vector2 Position => new Vector2(OffsetX, OffsetY);
-
-        public Texture2D Texture { get; }
-
-        public Guid Id { get; } = Guid.NewGuid();
-
-        public ITransition In { get; protected set; }
-
-        public ITransition Out { get; protected set; }
-        public bool IsActive { get; set; }
-
-        public bool CollisionDetective => false;
+        #region Public Methods
 
         public void Add(IComponent item)
         {
@@ -89,9 +109,18 @@ namespace Ovow.Framework.Scenes
 
         public void Clear() => gameComponents.Clear();
 
+        protected virtual string NextSceneName { get; set; }
+
         public bool Contains(IComponent item) => gameComponents.Contains(item);
 
         public void CopyTo(IComponent[] array, int arrayIndex) => gameComponents.CopyTo(array, arrayIndex);
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
@@ -131,6 +160,8 @@ namespace Ovow.Framework.Scenes
             }
         }
 
+        public virtual void Enter() { }
+
         public bool Equals(IComponent other)
         {
             if (ReferenceEquals(this, other))
@@ -148,6 +179,10 @@ namespace Ovow.Framework.Scenes
         }
 
         public IEnumerator<IComponent> GetEnumerator() => gameComponents.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => gameComponents.GetEnumerator();
+
+        public virtual void Leave() { }
 
         public abstract void Load(ContentManager contentManager);
 
@@ -197,7 +232,15 @@ namespace Ovow.Framework.Scenes
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator() => gameComponents.GetEnumerator();
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual void Dispose(bool disposing) { }
+
+        #endregion Protected Methods
+
+        #region Private Methods
 
         private void DoEnd()
         {
@@ -206,26 +249,6 @@ namespace Ovow.Framework.Scenes
             ended = true;
         }
 
-        #region IDisposable Support
-        protected virtual void Dispose(bool disposing) { }
-
-        ~Scene()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(false);
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        public virtual void Enter() { }
-
-        public virtual void Leave() { }
-        #endregion
-
+        #endregion Private Methods
     }
 }
