@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.Xna.Framework;
-using Ovow.Framework.Messaging.GeneralMessages;
+using Ovow.Framework.Messaging;
 using Ovow.Framework.Scenes;
 
 namespace Ovow.Framework.Services

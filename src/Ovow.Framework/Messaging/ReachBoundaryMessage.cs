@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ovow.Framework.Messaging.GeneralMessages
+namespace Ovow.Framework.Messaging
 {
     public sealed class ReachBoundaryMessage : Message
     {
