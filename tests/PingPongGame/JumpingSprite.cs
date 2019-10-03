@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Ovow.Framework;
-using Ovow.Framework.Messaging.GeneralMessages;
+using Ovow.Framework.Messaging;
 using Ovow.Framework.Scenes;
 using Ovow.Framework.Sprites;
 using System;

@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Ovow.Framework;
-using Ovow.Framework.Messaging.GeneralMessages;
 using Ovow.Framework.Scenes;
 using Ovow.Framework.Services;
 using Ovow.Framework.Transitions;
@@ -25,18 +24,7 @@ namespace PingPongGame
         public GameScene(IOvowGame game)
             : base(game)
         {
-            //Subscribe<CollisionDetectedMessage>((publisher, message) =>
-            //{
-            //    lock (sync)
-            //    {
-            //        times++;
-            //        if (times >= 10)
-            //        {
-            //            End();
-            //        }
-            //    }
-            //});
-
+            NextSceneName = "gameOver";
             Out = new DelayTransition(this, TimeSpan.FromMilliseconds(200));
         }
 
