@@ -205,15 +205,8 @@ namespace Ovow.Framework.Scenes
 
         public void Subscribe<TMessage>(Action<object, TMessage> handler) where TMessage : IMessage => Game.MessageDispatcher.RegisterHandler(handler);
 
-        protected bool Paused { get; set; } = false;
-
         public virtual void Update(GameTime gameTime)
         {
-            if (Paused)
-            {
-                return;
-            }
-
             (from comp in gameComponents where comp.IsActive select comp)
                 .AsParallel()
                 .ForAll(c => c.Update(gameTime));
