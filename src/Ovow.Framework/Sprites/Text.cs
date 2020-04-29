@@ -35,11 +35,15 @@ namespace Ovow.Framework.Sprites
             : this(value, scene, font, color, Vector2.Zero)
         { }
 
-        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        protected override void DoDraw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             spriteBatch.DrawString(this.font, this.Value, this.Position, this.options.Color);
         }
 
         public string Value { get; set; }
+
+        public float TextWidth => this.font.MeasureString(Value).X;
+
+        public float TextHeight => this.font.MeasureString(Value).Y;
     }
 }

@@ -28,8 +28,6 @@ namespace Ovow.Framework
 {
     public abstract class VisibleComponent : Component, IVisibleComponent
     {
-        private readonly IScene scene;
-
         protected VisibleComponent(IScene scene, Texture2D texture)
             : this(scene, texture, Vector2.Zero)
         {
@@ -37,7 +35,7 @@ namespace Ovow.Framework
 
         protected VisibleComponent(IScene scene, Texture2D texture, Vector2 position)
         {
-            this.scene = scene;
+            this.Scene = scene;
             this.Texture = texture;
             this.X = position.X;
             this.Y = position.Y;
@@ -56,13 +54,15 @@ namespace Ovow.Framework
 
         public int Height => this.Texture.Height;
 
-        protected IScene Scene => this.scene;
+        public bool Visible { get; set; } = true;
+
+        protected IScene Scene { get; }
 
         public bool OutOfViewport
         {
             get
             {
-                var viewport = scene.Game.GraphicsDevice.Viewport;
+                var viewport = Scene.Game.GraphicsDevice.Viewport;
                 return (X + Width <= 0) || (Y + Height <= 0) || (X >= viewport.Width) || (Y >= viewport.Height);
             }
         }
@@ -71,7 +71,7 @@ namespace Ovow.Framework
         {
             get
             {
-                var viewport = scene.Game.GraphicsDevice.Viewport;
+                var viewport = Scene.Game.GraphicsDevice.Viewport;
                 return (X <= 0) || (Y <= 0) || (X >= viewport.Width - Width) || (Y >= viewport.Height - Height);
             }
         }
@@ -80,11 +80,19 @@ namespace Ovow.Framework
 
         public virtual bool CollisionDetective { get; set; }
 
-        public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            if (Visible)
+            {
+                DoDraw(gameTime, spriteBatch);
+            }
+        }
+
+        protected abstract void DoDraw(GameTime gameTime, SpriteBatch spriteBatch);
 
         public override void Update(GameTime gameTime)
         {
-            var viewport = scene.Game.GraphicsDevice.Viewport;
+            var viewport = Scene.Game.GraphicsDevice.Viewport;
             var b = Boundary.None;
             if (X <= 0)
             {
@@ -108,13 +116,13 @@ namespace Ovow.Framework
 
         public void Publish<TMessage>(TMessage message) where TMessage : IMessage
         {
-            scene.Game.MessageDispatcher.DispatchMessageAsync(this, message);
+            Scene.Game.MessageDispatcher.DispatchMessageAsync(this, message);
         }
 
         public void Subscribe<TMessage>(Action<object, TMessage> handler)
             where TMessage : IMessage
         {
-            scene.Game.MessageDispatcher.RegisterHandler<TMessage>(handler);
+            Scene.Game.MessageDispatcher.RegisterHandler<TMessage>(handler);
         }
 
         public override string ToString() => this.Id.ToString();

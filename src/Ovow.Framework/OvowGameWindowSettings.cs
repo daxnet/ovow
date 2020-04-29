@@ -59,5 +59,7 @@ namespace Ovow.Framework
         public bool MouseVisible { get; set; }
 
         public bool AllowUserResizing { get; set; }
+
+        public string Title { get; set; }
     }
 }

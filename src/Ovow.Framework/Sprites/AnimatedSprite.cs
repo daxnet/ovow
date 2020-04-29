@@ -79,7 +79,7 @@ namespace Ovow.Framework.Sprites
             }
         }
 
-        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        protected override void DoDraw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             if (!stop)
             {

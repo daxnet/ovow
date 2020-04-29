@@ -60,6 +60,11 @@ namespace Ovow.Framework
             this.windowSettings = windowSettings;
             Content.RootDirectory = "Content";
 
+            if (!string.IsNullOrEmpty(windowSettings.Title))
+            {
+                this.Window.Title = windowSettings.Title;
+            }
+
             this.MessageDispatcher.RegisterHandler<SceneEndedMessage>((publisher, message) =>
             {
                 lock (sync)
