@@ -34,6 +34,7 @@ namespace Ovow.Framework.Sounds
         private readonly SoundEffect soundEffect;
         private readonly float volume;
         private SoundEffectInstance soundEffectInstance;
+        private static readonly object lockObj = new object();
 
         #endregion Private Fields
 
@@ -61,9 +62,12 @@ namespace Ovow.Framework.Sounds
         {
             Stop();
 
-            soundEffectInstance = soundEffect.CreateInstance();
-            soundEffectInstance.Volume = this.volume;
-            soundEffectInstance.Play();
+            lock (lockObj)
+            {
+                soundEffectInstance = soundEffect.CreateInstance();
+                soundEffectInstance.Volume = this.volume;
+                soundEffectInstance.Play();
+            }
         }
 
         /// <summary>
@@ -71,11 +75,18 @@ namespace Ovow.Framework.Sounds
         /// </summary>
         public void Stop()
         {
-            if (soundEffectInstance != null &&
-                !soundEffectInstance.IsDisposed)
+            lock (lockObj)
             {
-                soundEffectInstance.Stop(true);
-                soundEffectInstance.Dispose();
+                if (soundEffectInstance != null &&
+                    !soundEffectInstance.IsDisposed)
+                {
+                    try
+                    {
+                        soundEffectInstance.Stop(true);
+                        soundEffectInstance.Dispose();
+                    }
+                    catch { }
+                }
             }
         }
 
