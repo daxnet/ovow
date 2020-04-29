@@ -18,7 +18,8 @@ namespace Ovow.Framework.Scenes
         private readonly List<IComponent> gameComponents = new List<IComponent>();
         private volatile bool ended = false;
         private volatile bool ending = false;
-        private bool removing = false;
+        // private volatile bool removing = false;
+        private static readonly object lockRoot = new object();
 
         #endregion Private Fields
 
@@ -103,10 +104,19 @@ namespace Ovow.Framework.Scenes
 
         public void Add(IComponent item)
         {
-            gameComponents.Add(item);
+            lock (lockRoot)
+            {
+                gameComponents.Add(item);
+            }
         }
 
-        public void Clear() => gameComponents.Clear();
+        public void Clear()
+        {
+            lock (lockRoot)
+            {
+                gameComponents.Clear();
+            }
+        }
 
         protected virtual string NextSceneName { get; set; }
 
@@ -125,8 +135,8 @@ namespace Ovow.Framework.Scenes
         {
             this.Game.GraphicsDevice.Clear(BackgroundColor);
 
-            if (!removing)
-            {
+            lock(lockRoot)
+            { 
                 gameComponents
                     .Where(c => c is IVisibleComponent)
                     .Select(c => c as IVisibleComponent)
@@ -190,17 +200,26 @@ namespace Ovow.Framework.Scenes
             Game.MessageDispatcher.DispatchMessageAsync(this, message);
         }
 
-        public bool Remove(IComponent item) => gameComponents.Remove(item);
+        public bool Remove(IComponent item)
+        {
+            lock (lockRoot)
+            {
+                return gameComponents.Remove(item);
+            }
+        }
 
         public void RemoveAll<TComponent>(Predicate<TComponent> predicate = null)
             where TComponent : IComponent
         {
-            if (predicate == null)
+            lock (lockRoot)
             {
-                gameComponents.RemoveAll(_ => true);
-            }
+                if (predicate == null)
+                {
+                    gameComponents.RemoveAll(_ => true);
+                }
 
-            gameComponents.RemoveAll(item => item is TComponent tc && predicate(tc));
+                gameComponents.RemoveAll(item => item is TComponent tc && predicate(tc));
+            }
         }
 
         public void Subscribe<TMessage>(Action<object, TMessage> handler) where TMessage : IMessage => Game.MessageDispatcher.RegisterHandler(handler);
@@ -218,14 +237,9 @@ namespace Ovow.Framework.Scenes
                 .AsParallel()
                 .ForAll(c => c.Update(gameTime));
 
-            try
-            {
-                removing = true;
+            lock (lockRoot)
+            { 
                 gameComponents.RemoveAll(c => !c.IsActive);
-            }
-            finally
-            {
-                removing = false;
             }
 
             if (ending && !ended && this.Out != null)
