@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Boundary.cs" />
     <Compile Include="Component.cs" />
+    <Compile Include="Components\ProgressBar.cs" />
     <Compile Include="Messaging\FpsMessage.cs" />
     <Compile Include="Scenes\IScene.cs" />
     <Compile Include="Messaging\SceneEndedMessage.cs" />
@@ -87,8 +88,8 @@
     <Compile Include="Services\GameService.cs" />
     <Compile Include="Services\IGameService.cs" />
     <Compile Include="Sprites\Sprite.cs" />
-    <Compile Include="Sprites\Text.cs" />
-    <Compile Include="Sprites\TextRenderingOptions.cs" />
+    <Compile Include="Components\Text.cs" />
+    <Compile Include="Components\TextRenderingOptions.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="VisibleComponent.cs" />
   </ItemGroup>

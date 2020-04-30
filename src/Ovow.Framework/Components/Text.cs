@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ovow.Framework.Sprites
+namespace Ovow.Framework.Components
 {
     public sealed class Text : VisibleComponent
     {

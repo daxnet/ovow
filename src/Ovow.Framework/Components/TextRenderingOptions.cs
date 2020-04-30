@@ -1,12 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Ovow.Framework.Sprites
+namespace Ovow.Framework.Components
 {
+    /// <summary>
+    /// Represents the rendering options for the texts.
+    /// </summary>
     public struct TextRenderingOptions
     {
         public static readonly TextRenderingOptions DefaultOptions = new TextRenderingOptions(false, Color.Black);

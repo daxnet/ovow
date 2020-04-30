@@ -28,6 +28,10 @@ namespace Ovow.Framework
 {
     public abstract class VisibleComponent : Component, IVisibleComponent
     {
+        protected VisibleComponent(IScene scene)
+            : this(scene, null)
+        { }
+
         protected VisibleComponent(IScene scene, Texture2D texture)
             : this(scene, texture, Vector2.Zero)
         {
@@ -50,9 +54,9 @@ namespace Ovow.Framework
 
         public float Y { get; set; }
 
-        public int Width => this.Texture.Width;
+        public int Width => this.Texture?.Width ?? 0;
 
-        public int Height => this.Texture.Height;
+        public int Height => this.Texture?.Height ?? 0;
 
         public bool Visible { get; set; } = true;
 
