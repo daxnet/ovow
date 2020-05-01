@@ -22,6 +22,7 @@ namespace Ovow.Framework.Components
         public Text(string value, IScene scene, SpriteFont font, TextRenderingOptions options, Vector2 position) 
             : base(scene, font.Texture, position)
         {
+            CollisionDetective = false;
             this.font = font;
             this.Value = value;
             this.options = options;

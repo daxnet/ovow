@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Ovow.Framework.Messaging;
 using Ovow.Framework.Transitions;
 
@@ -18,7 +19,6 @@ namespace Ovow.Framework.Scenes
         private readonly List<IComponent> gameComponents = new List<IComponent>();
         private volatile bool ended = false;
         private volatile bool ending = false;
-        // private volatile bool removing = false;
         private static readonly object lockRoot = new object();
 
         #endregion Private Fields
@@ -135,8 +135,8 @@ namespace Ovow.Framework.Scenes
         {
             this.Game.GraphicsDevice.Clear(BackgroundColor);
 
-            lock(lockRoot)
-            { 
+            lock (lockRoot)
+            {
                 gameComponents
                     .Where(c => c is IVisibleComponent)
                     .Select(c => c as IVisibleComponent)
@@ -148,7 +148,12 @@ namespace Ovow.Framework.Scenes
             {
                 this.Out.Draw(gameTime, spriteBatch);
             }
+        }
 
+        public void EndTo(string sceneName)
+        {
+            NextSceneName = sceneName;
+            End();
         }
 
         public virtual void End()
@@ -231,7 +236,7 @@ namespace Ovow.Framework.Scenes
                 .ForAll(c => c.Update(gameTime));
 
             lock (lockRoot)
-            { 
+            {
                 gameComponents.RemoveAll(c => !c.IsActive);
             }
 

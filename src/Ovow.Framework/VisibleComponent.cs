@@ -26,6 +26,9 @@ using System;
 
 namespace Ovow.Framework
 {
+    /// <summary>
+    /// Represents a visible component on a game scene.
+    /// </summary>
     public abstract class VisibleComponent : Component, IVisibleComponent
     {
         protected VisibleComponent(IScene scene)
@@ -46,30 +49,9 @@ namespace Ovow.Framework
             CollisionDetective = true;
         }
 
-        public Texture2D Texture { get; }
-
-        public Vector2 Position => new Vector2(X, Y);
-
-        public float X { get; set; }
-
-        public float Y { get; set; }
-
-        public int Width => this.Texture?.Width ?? 0;
-
-        public int Height => this.Texture?.Height ?? 0;
-
-        public bool Visible { get; set; } = true;
-
-        protected IScene Scene { get; }
-
-        public bool OutOfViewport
-        {
-            get
-            {
-                var viewport = Scene.Game.GraphicsDevice.Viewport;
-                return (X + Width <= 0) || (Y + Height <= 0) || (X >= viewport.Width) || (Y >= viewport.Height);
-            }
-        }
+        public Rectangle BoundingBox => new Rectangle((int)X, (int)Y, Width, Height);
+        public virtual bool CollisionDetective { get; set; }
+        public virtual int Height => this.Texture?.Height ?? 0;
 
         public bool HitViewportBoundary
         {
@@ -80,9 +62,23 @@ namespace Ovow.Framework
             }
         }
 
-        public Rectangle BoundingBox => new Rectangle((int)X, (int)Y, Width, Height);
+        public bool OutOfViewport
+        {
+            get
+            {
+                var viewport = Scene.Game.GraphicsDevice.Viewport;
+                return (X + Width <= 0) || (Y + Height <= 0) || (X >= viewport.Width) || (Y >= viewport.Height);
+            }
+        }
 
-        public virtual bool CollisionDetective { get; set; }
+        public Vector2 Position => new Vector2(X, Y);
+        public Texture2D Texture { get; }
+        public bool Visible { get; set; } = true;
+        public virtual int Width => this.Texture?.Width ?? 0;
+        public virtual float X { get; set; }
+
+        public virtual float Y { get; set; }
+        protected IScene Scene { get; }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
@@ -92,7 +88,18 @@ namespace Ovow.Framework
             }
         }
 
-        protected abstract void DoDraw(GameTime gameTime, SpriteBatch spriteBatch);
+        public void Publish<TMessage>(TMessage message) where TMessage : IMessage
+        {
+            Scene.Game.MessageDispatcher.DispatchMessageAsync(this, message);
+        }
+
+        public void Subscribe<TMessage>(Action<object, TMessage> handler)
+            where TMessage : IMessage
+        {
+            Scene.Game.MessageDispatcher.RegisterHandler<TMessage>(handler);
+        }
+
+        public override string ToString() => this.Id.ToString();
 
         public override void Update(GameTime gameTime)
         {
@@ -118,17 +125,6 @@ namespace Ovow.Framework
             this.Publish(new ReachBoundaryMessage(b));
         }
 
-        public void Publish<TMessage>(TMessage message) where TMessage : IMessage
-        {
-            Scene.Game.MessageDispatcher.DispatchMessageAsync(this, message);
-        }
-
-        public void Subscribe<TMessage>(Action<object, TMessage> handler)
-            where TMessage : IMessage
-        {
-            Scene.Game.MessageDispatcher.RegisterHandler<TMessage>(handler);
-        }
-
-        public override string ToString() => this.Id.ToString();
+        protected abstract void DoDraw(GameTime gameTime, SpriteBatch spriteBatch);
     }
 }

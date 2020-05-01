@@ -42,6 +42,7 @@ namespace Ovow.Framework.Components
         public ProgressBar(IScene scene, Rectangle rectangle, Orientation barOrientation)
             : base(scene)
         {
+            CollisionDetective = false;
             borderOuterRect = rectangle;
             BarOrientation = barOrientation;
             Initialize();
@@ -53,6 +54,22 @@ namespace Ovow.Framework.Components
         public ProgressBar(IScene scene, int x, int y, int width, int height, Orientation barOrientation)
             : this(scene, new Rectangle(x, y, width, height), barOrientation)
         { }
+
+        public override float X
+        {
+            get => borderOuterRect.X;
+            set => borderOuterRect.X = (int)value;
+        }
+
+        public override float Y
+        {
+            get => borderOuterRect.Y;
+            set => borderOuterRect.Y = (int)value;
+        }
+
+        public override int Height => borderOuterRect.Height;
+
+        public override int Width => borderOuterRect.Width;
 
         public float Value
         {
