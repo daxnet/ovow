@@ -14,10 +14,7 @@ namespace Ovow.Framework.Services
         private static readonly CollisionDetector detector = new CollisionDetector();
 
         public CollisionDetectionService(IScene scene)
-            : base(scene)
-        {
-
-        }
+            : base(scene) { }
 
         public override void Update(GameTime gameTime)
         {
