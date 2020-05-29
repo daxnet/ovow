@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Ovow.Framework;
+using Ovow.Framework.Components;
 using Ovow.Framework.Scenes;
 using Ovow.Framework.Sprites;
 
