@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PingPongGame
+namespace PingPongGameDemo
 {
     public class JumpingSprite : Sprite
     {

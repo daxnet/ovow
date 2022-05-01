@@ -7,7 +7,7 @@ using Ovow.Framework.Components;
 using Ovow.Framework.Scenes;
 using Ovow.Framework.Sprites;
 
-namespace PingPongGame
+namespace PingPongGameDemo
 {
     internal sealed class GameOverScene : Scene
     {

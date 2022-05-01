@@ -1,6 +1,6 @@
 ﻿using Ovow.Framework;
 
-namespace PingPongGame
+namespace PingPongGameDemo
 {
     /// <summary>
     /// This is the main type for your game.

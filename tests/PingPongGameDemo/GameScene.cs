@@ -11,7 +11,7 @@ using Ovow.Framework.Sprites;
 using Ovow.Framework.Transitions;
 using System;
 
-namespace PingPongGame
+namespace PingPongGameDemo
 {
     internal sealed class GameScene : Scene
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PingPongGame.Messages
+namespace PingPongGameDemo.Messages
 {
     public class MovingMessage : IMessage
     {
