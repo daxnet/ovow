@@ -23,7 +23,9 @@ namespace Ovow.Framework
 
         IMessageDispatcher MessageDispatcher { get; }
 
-        GraphicsDevice GraphicsDevice { get; }
+        GraphicsDevice GraphicsDeviceInstance { get; }
+
+        SpriteBatchDrawOptions SpriteBatchDrawOptions { get; set; }
 
         void Exit();
     }

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Ovow.Framework.Messaging;
 using Ovow.Framework.Transitions;
 
@@ -13,13 +14,13 @@ namespace Ovow.Framework.Scenes
 {
     public abstract class Scene : IScene
     {
+
         #region Private Fields
 
-        private static readonly object endingSyncLock = new object();
-        private readonly List<IComponent> gameComponents = new List<IComponent>();
+        private static readonly object endingSyncLock = new();
+        private readonly ConcurrentDictionary<Guid, IComponent> gameComponents = new();
         private volatile bool ended = false;
         private volatile bool ending = false;
-        private static readonly object lockRoot = new object();
 
         #endregion Private Fields
 
@@ -94,35 +95,30 @@ namespace Ovow.Framework.Scenes
         public ITransition Out { get; protected set; }
         public Vector2 Position => new Vector2(OffsetX, OffsetY);
         public Texture2D Texture { get; }
-        public int ViewportHeight => Game.GraphicsDevice.Viewport.Height;
-        public int ViewportWidth => Game.GraphicsDevice.Viewport.Width;
+        public int ViewportHeight => Game.GraphicsDeviceInstance.Viewport.Height;
+        public int ViewportWidth => Game.GraphicsDeviceInstance.Viewport.Width;
         public int Width => Texture == null ? 0 : Texture.Width;
 
         #endregion Public Properties
 
-        #region Public Methods
-
-        public void Add(IComponent item)
-        {
-            lock (lockRoot)
-            {
-                gameComponents.Add(item);
-            }
-        }
-
-        public void Clear()
-        {
-            lock (lockRoot)
-            {
-                gameComponents.Clear();
-            }
-        }
+        #region Protected Properties
 
         protected virtual string NextSceneName { get; set; }
 
-        public bool Contains(IComponent item) => gameComponents.Contains(item);
+        #endregion Protected Properties
 
-        public void CopyTo(IComponent[] array, int arrayIndex) => gameComponents.CopyTo(array, arrayIndex);
+        #region Public Methods
+
+        public void Add(IComponent item) => gameComponents.TryAdd(item.Id, item);
+
+        public void Clear() => gameComponents.Clear();
+        public bool Contains(IComponent item) => gameComponents.ContainsKey(item.Id);
+
+        public void CopyTo(IComponent[] array, int arrayIndex)
+        {
+            var list = gameComponents.Values.ToList();
+            list.CopyTo(array, arrayIndex);
+        }
 
         // This code added to correctly implement the disposable pattern.
         public void Dispose()
@@ -133,27 +129,20 @@ namespace Ovow.Framework.Scenes
 
         public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            this.Game.GraphicsDevice.Clear(BackgroundColor);
+            this.Game.GraphicsDeviceInstance.Clear(BackgroundColor);
 
-            lock (lockRoot)
+            var query = from c in gameComponents
+                        where c.Value is IVisibleComponent
+                        select c.Value as IVisibleComponent;
+            foreach(var item in query)
             {
-                gameComponents
-                    .Where(c => c is IVisibleComponent)
-                    .Select(c => c as IVisibleComponent)
-                    .ToList()
-                    .ForEach(vc => vc.Draw(gameTime, spriteBatch));
+                item.Draw(gameTime, spriteBatch);
             }
 
             if (this.ending && !this.ended && this.Out != null)
             {
                 this.Out.Draw(gameTime, spriteBatch);
             }
-        }
-
-        public void EndTo(string sceneName)
-        {
-            NextSceneName = sceneName;
-            End();
         }
 
         public virtual void End()
@@ -174,6 +163,11 @@ namespace Ovow.Framework.Scenes
             }
         }
 
+        public void EndTo(string sceneName)
+        {
+            NextSceneName = sceneName;
+            End();
+        }
         public virtual void Enter() { }
 
         public bool Equals(IComponent other)
@@ -192,7 +186,7 @@ namespace Ovow.Framework.Scenes
             return Id.Equals(otherScene.Id);
         }
 
-        public IEnumerator<IComponent> GetEnumerator() => gameComponents.GetEnumerator();
+        public IEnumerator<IComponent> GetEnumerator() => gameComponents.Values.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => gameComponents.GetEnumerator();
 
@@ -205,25 +199,16 @@ namespace Ovow.Framework.Scenes
             Game.MessageDispatcher.DispatchMessageAsync(this, message);
         }
 
-        public bool Remove(IComponent item)
-        {
-            lock (lockRoot)
-            {
-                return gameComponents.Remove(item);
-            }
-        }
+        public bool Remove(IComponent item) => gameComponents.TryRemove(item.Id, out var _);
 
         public void RemoveAll<TComponent>(Predicate<TComponent> predicate = null)
             where TComponent : IComponent
         {
-            lock (lockRoot)
+            foreach (var kvp in from kvp in gameComponents
+                                where kvp.Value is TComponent tc && predicate(tc)
+                                select kvp)
             {
-                if (predicate == null)
-                {
-                    gameComponents.RemoveAll(_ => true);
-                }
-
-                gameComponents.RemoveAll(item => item is TComponent tc && predicate(tc));
+                kvp.Value.IsActive = false;
             }
         }
 
@@ -231,14 +216,17 @@ namespace Ovow.Framework.Scenes
 
         public virtual void Update(GameTime gameTime)
         {
-            (from comp in gameComponents where comp.IsActive select comp)
-                .AsParallel()
-                .ForAll(c => c.Update(gameTime));
+            var inactiveIdList = from c in gameComponents
+                      where !c.Value.IsActive
+                      select c.Key;
 
-            lock (lockRoot)
-            {
-                gameComponents.RemoveAll(c => !c.IsActive);
-            }
+            Parallel.ForEach(inactiveIdList, id => gameComponents.TryRemove(id, out var _));
+
+            var activeComponents = from c in gameComponents
+                                 where c.Value.IsActive
+                                 select c.Value;
+
+            Parallel.ForEach(activeComponents, c => c.Update(gameTime));
 
             if (ending && !ended && this.Out != null)
             {
@@ -268,5 +256,6 @@ namespace Ovow.Framework.Scenes
         }
 
         #endregion Private Methods
+
     }
 }

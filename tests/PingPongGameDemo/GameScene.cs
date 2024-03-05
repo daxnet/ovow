@@ -15,7 +15,7 @@ namespace PingPongGameDemo
 {
     internal sealed class GameScene : Scene
     {
-        private const int NumOfBalls = 20;
+        private const int NumOfBalls = 10;
         private const int MaxDelta = 10;
 
         // private int times = 0;
@@ -41,8 +41,8 @@ namespace PingPongGameDemo
         {
             spriteTexture = contentManager.Load<Texture2D>("football");
 
-            var screenWidth = Game.GraphicsDevice.Viewport.Width;
-            var screenHeight = Game.GraphicsDevice.Viewport.Height;
+            var screenWidth = Game.GraphicsDeviceInstance.Viewport.Width;
+            var screenHeight = Game.GraphicsDeviceInstance.Viewport.Height;
 
             for (var i = 0; i < NumOfBalls; i++)
             {
@@ -60,7 +60,7 @@ namespace PingPongGameDemo
             fpsText = new Text("", this, font, Color.White) { CollisionDetective = false };
             Add(fpsText);
 
-            this.Add(new FpsService(this, 1));
+            this.Add(new FpsService(this));
             this.Add(new CollisionDetectionService(this));
         }
 

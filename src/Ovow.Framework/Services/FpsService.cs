@@ -11,28 +11,30 @@ namespace Ovow.Framework.Services
 {
     public sealed class FpsService : GameService
     {
-        private TimeSpan elapsed = TimeSpan.Zero;
-        private readonly TimeSpan updateInterval;
-        private readonly int updateSeconds;
-        private float counter;
+        private double _now = 0;
+        private double _elapsed = 0;
+        private double _last = 0;
+        private double _updates = 0;
+        private double _updateFrequency = 0;
 
-        public FpsService(IScene scene, int updateSeconds = 5) : base(scene)
+        public FpsService(IScene scene, double updateFrequency = 1) : base(scene)
         {
-            this.updateSeconds = updateSeconds;
-            updateInterval = TimeSpan.FromSeconds(updateSeconds);
+            _updateFrequency = updateFrequency;
         }
 
         public override void Update(GameTime gameTime)
         {
-            counter += 1.0F;
-            elapsed += gameTime.ElapsedGameTime;
-            if (elapsed >= updateInterval)
+            _now = gameTime.TotalGameTime.TotalSeconds;
+            _elapsed = (double)(_now - _last);
+            if (_elapsed > _updateFrequency)
             {
-                var fps = counter / updateSeconds;
-                Publish(new FpsMessage(fps));
-                counter = 0;
-                elapsed = TimeSpan.Zero;
+                Publish(new FpsMessage((float)(_updates / _elapsed)));
+                _elapsed = 0;
+                _last = _now;
+                _updates = 0;
             }
+
+            _updates++;
         }
     }
 }

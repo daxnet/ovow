@@ -6,7 +6,7 @@
 //
 // A 2D gaming framework on MonoGame
 //
-// Copyright (C) 2019 by daxnet.
+// Author: daxnet.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -96,6 +96,10 @@ namespace Ovow.Framework
 
         public IMessageDispatcher MessageDispatcher { get; } = new MessageDispatcher();
 
+        public GraphicsDevice GraphicsDeviceInstance => base.GraphicsDevice;
+
+        public SpriteBatchDrawOptions SpriteBatchDrawOptions { get; set; } = SpriteBatchDrawOptions.Default;
+
         #endregion Public Properties
 
         #region Public Methods
@@ -144,7 +148,14 @@ namespace Ovow.Framework
 
         protected override void Draw(GameTime gameTime)
         {
-            this.spriteBatch.Begin();
+            this.spriteBatch.Begin(
+                SpriteBatchDrawOptions.SpriteSortMode,
+                SpriteBatchDrawOptions.BlendState,
+                SpriteBatchDrawOptions.SamplerState,
+                SpriteBatchDrawOptions.DepthStencilState,
+                SpriteBatchDrawOptions.RasterizerState,
+                SpriteBatchDrawOptions.Effect,
+                SpriteBatchDrawOptions.TransformMatrix);
 
             ActiveScene?.Draw(gameTime, this.spriteBatch);
 

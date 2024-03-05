@@ -6,7 +6,7 @@
 //
 // A 2D gaming framework on MonoGame
 //
-// Copyright (C) 2019 by daxnet.
+// Author: daxnet.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -57,7 +57,7 @@ namespace Ovow.Framework
         {
             get
             {
-                var viewport = Scene.Game.GraphicsDevice.Viewport;
+                var viewport = Scene.Game.GraphicsDeviceInstance.Viewport;
                 return (X <= 0) || (Y <= 0) || (X >= viewport.Width - Width) || (Y >= viewport.Height - Height);
             }
         }
@@ -66,7 +66,7 @@ namespace Ovow.Framework
         {
             get
             {
-                var viewport = Scene.Game.GraphicsDevice.Viewport;
+                var viewport = Scene.Game.GraphicsDeviceInstance.Viewport;
                 return (X + Width <= 0) || (Y + Height <= 0) || (X >= viewport.Width) || (Y >= viewport.Height);
             }
         }
@@ -103,7 +103,7 @@ namespace Ovow.Framework
 
         public override void Update(GameTime gameTime)
         {
-            var viewport = Scene.Game.GraphicsDevice.Viewport;
+            var viewport = Scene.Game.GraphicsDeviceInstance.Viewport;
             var b = Boundary.None;
             if (X <= 0)
             {

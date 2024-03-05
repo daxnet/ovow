@@ -6,7 +6,7 @@
 //
 // A 2D gaming framework on MonoGame
 //
-// Copyright (C) 2019 by daxnet.
+// Author: daxnet.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 
 namespace Ovow.Framework.Messaging
 {
-    internal sealed class MessageDispatcher : IMessageDispatcher
+    public sealed class MessageDispatcher : IMessageDispatcher
     {
         private readonly ConcurrentDictionary<Type, List<Action<object, IMessage>>> messageHandlers = new ConcurrentDictionary<Type, List<Action<object, IMessage>>>();
 
